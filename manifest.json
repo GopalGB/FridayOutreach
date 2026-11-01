@@ -6,10 +6,22 @@
   "emailVerificationDefault": true,
   "emailVerificationOptOut": "--skip-email-verification or verify_emails:false",
   "files": {
+    ".github/ISSUE_TEMPLATE/bug_report.yml": "addd47ec9ebb1d8601f727cbe75f168b093a133383e5d74ca854baf85c6d714f",
+    ".github/ISSUE_TEMPLATE/config.yml": "2e34039c1afdceb146576d226ecf037f3f8323d6dd0ea2ddc34e7c0378f11de6",
+    ".github/ISSUE_TEMPLATE/feature_request.yml": "c2eef5d44ce07c7d32dd8675e9a853a061ec7ebc3263ff6bbfbd657d16453274",
+    ".github/PULL_REQUEST_TEMPLATE.md": "f1edb18ce59c2b328d5dda0ef71daa02d01be28ac358fec8b6aa69f919fe1180",
     ".github/workflows/verify.yml": "4d480a111ba186596b84993ee628a34dd038a2403f6559bdca3f73c40470f8ec",
     ".gitignore": "9251465406dc97d52546eb7c0d542b14cae3efacb5178f4a1ee0d7d4677b6c02",
-    "README.md": "57b1510b9e4e3ffe637ad519bee01f6c4f273703c6383ae4f1a36b01142e5ae9",
+    "CODE_OF_CONDUCT.md": "cd655044c624caefc4f1ab022fa9f6f10a6ec1056d74114d99f76a77f5d9a765",
+    "CONTRIBUTING.md": "4e14e76f913902c2a11cf615dab812a6cf7d9de718928261ec392da96fc8487b",
+    "README.md": "947386f508d6ec8d1c870890e663125e342f1fdd1a157f592d2e87254743a1d6",
+    "ROADMAP.md": "38e725394ed8cba49ecec98e7e275d9e1c045686ac16c3d7205f92fab38b0d1d",
+    "SECURITY.md": "eed4d37684574a7615a171b6e24171ea1fb6c7c6db347d6b7c679485b7d4d675",
     "docs/AGENT-USAGE.md": "4a2d31d681bb838625e28a2dd1f187b622bbb110603366a506b8185c2ff9edad",
+    "docs/ARCHITECTURE.md": "743ec526cc830752bbc62029a59ab85e4250646ee0dffa75e3f059a720548837",
+    "docs/GETTING-STARTED.md": "43b511f24e3e300bc2398f51fe02172666af58a494bdf5f0bbc7c65380f647a4",
+    "docs/OUTPUT-SCHEMA.md": "0ad69a9ca883f2320e64a897aafd5c8fe9e945fb277431c105c899ac5c5c5451",
+    "docs/TROUBLESHOOTING.md": "5c1b7a1a4a6b9e7098344d7b2c39e69dd2d3f6e82dd4da1f61469da6116893e2",
     "docs/VERIFICATION.md": "6e5484bf365d65d152e37613eb411bae27122a582b64aa129ae838b599684af4",
     "docs/coverage.json": "58e061dbd2a82f133deb4772aca8f3f66e3a4e8bdc7ff1bac4607d86afb54614",
     "example.html": "2524ab929ad64726b830f076f7a62a79f4b6d92b3312bf460ca6fb89eef329dd",
@@ -118,5 +130,5 @@
   "safeContactsFilename": "<output-stem>.safe.csv",
   "safeContactsPredicate": "literal published address + native Reacher safe + mailboxVerified true + syntax/MX/SMTP true + catchAll/disabled/fullInbox false + no error",
   "skill": "skills/fridayoutreach/SKILL.md",
-  "sourceDigest": "44a7f59c60dcaa1823f5361a9779e7544001f2ed44a97f02db8e8fc201673643"
+  "sourceDigest": "3743821da241715942aad77ebc5cdccc265295b3f7b7a7339c6880abb5a26d80"
 }

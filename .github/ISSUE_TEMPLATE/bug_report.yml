@@ -1,0 +1,36 @@
+name: Bug report
+description: Report a reproducible problem using a fictional or sanitized fixture.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include real leads, credentials, .env contents, mailbox data, or private logs. Security issues belong in the private advisory form.
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+      placeholder: "e.g. 0.2.0 or commit SHA"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include the smallest fictional fixture and exact command.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual result
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Python, Node.js, OS, and whether the optional native runner was installed.
+    validations:
+      required: true

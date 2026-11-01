@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a bounded, reviewable improvement.
+title: "feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and use case
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Proposed scope
+      description: Name entry points, boundaries, and out-of-scope behavior. Do not promise arbitrary sites, sends, or live providers.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Acceptance and local verification
+    validations:
+      required: true

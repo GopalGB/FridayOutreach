@@ -1,142 +1,66 @@
 # FridayOutreach
 
-FridayOutreach is a local-first scraper for fictional or explicitly approved public pages. It extracts company rows and published contact links into a reviewable SQLite job. It does not send leads or perform outreach.
+[![Verify](https://github.com/GopalGB/FridayOutreach/actions/workflows/verify.yml/badge.svg)](https://github.com/GopalGB/FridayOutreach/actions/workflows/verify.yml) [![Release](https://img.shields.io/github/v/release/GopalGB/FridayOutreach?display_name=tag)](https://github.com/GopalGB/FridayOutreach/releases)
 
-## Quick start
+FridayOutreach turns approved public websites into source-linked CSVs for review. Its deterministic local core preserves all observations in a full CSV and writes a strict safe-only CSV when local mailbox checks qualify a contact. It is ready for a trusted function-calling host through its documented local agent runner.
+
+- Collect tables or repeated cards with explicit recipes, then review, edit or exclude records before export.
+- Extract published contacts with their source URLs and observation times.
+- Keep every verification outcome in the full CSV and get a separate safe-contact CSV automatically.
+- Use the CLI, the installed Codex skill, or the [provider-neutral agent function](integrations/fridayoutreach-function-tool.json).
+
+## Start with the local core
 
 ```sh
 git clone https://github.com/GopalGB/FridayOutreach.git
 cd FridayOutreach
 python3 scripts/setup.py --core
-python3 scripts/setup.py --install
-fridayoutreach doctor
+.venv/bin/python -m lead_collector preview --html example.html --source-url https://source.example.test/directory --mapping '{"Name":"company"}'
 ```
 
-`--core` installs only the hash-locked local wheels. It does not contact an index, start a model service, pull a model, discover credentials, or call a provider. `--install` adds the local FridayOutreach launcher and skill; the launcher is `~/.local/bin/fridayoutreach`.
+This checked-in preview reads fictional HTML locally: it needs no HTTP, SMTP, AI, credentials, or native runner. For the installed commands below, run `python3 scripts/setup.py --install` once to add the `fridayoutreach` launcher and Codex skill. `lead-collector` remains a compatible alias. You can also replace `fridayoutreach` with `.venv/bin/python -m lead_collector` from the clone. The [getting-started workflow](docs/GETTING-STARTED.md) covers directory collection and review.
 
-Run `python3 scripts/setup.py --install` to install that launcher, or use
-`.venv/bin/python lead.py` from the clone. `lead-collector` remains a legacy alias.
-
-## Reviewable offline workflow
+For an offline enrichment demonstration, create new files in a directory you own. A blank `website` prevents HTTP fetches; `--skip-email-verification` disables SMTP verification, not HTTP:
 
 ```sh
-lead-collector collect --html example.html --source-url https://source.example.test/directory --mapping '{"Name":"company"}'
-# Copy the returned job ID and row ID from the JSON envelope.
-lead-collector review --job JOB_ID --query fictional --sort company
-lead-collector export --job JOB_ID --format json --output review.json --row ROW_ID
+FRIDAY_DEMO_DIR="$(mktemp -d "${HOME}/friday-demo.XXXXXX")"
+printf '%s\n' 'company,website' 'Fictional Offline Co,' > "$FRIDAY_DEMO_DIR/offline-input.csv"
+fridayoutreach enrich --input "$FRIDAY_DEMO_DIR/offline-input.csv" --output "$FRIDAY_DEMO_DIR/offline-results.csv" --skip-email-verification
 ```
 
-The default state is `~/.local/share/lead-collector/jobs.sqlite3`. `--state` accepts a simple filename or a direct leaf inside that managed private directory. External, nested, traversal, and protected paths are rejected. Use `edit`, `exclude`, `snapshot`, and `import` for human-controlled review. JSON export is lossless; CSV is a projection. Existing output files are preserved unless `--overwrite` is explicit.
-
-The CLI supports `collect`, `contacts`, `control`, `resume`, `snapshot`, `review`, `edit`, `exclude`, `export`, `import`, `recipe`, `clear`, and `assist`. Collection is bounded by explicit host/path, page, row, redirect, size, and timeout limits. `clear` requires confirmation.
-
-`assist --ai off` uses captured HTML only and has no optional AI dependency. ScrapeGraphAI is optional: only after Ollama is already running locally and `qwen3:0.6b` is installed, use:
+This creates `offline-results.csv` and `offline-results.safe.csv` in the new demo directory. The full CSV records `no_website`; the safe CSV is header-only because verification was explicitly skipped. For a normal verified run, first follow the separate [local Reacher runner setup](scripts/reacher_smtp_runner/README.md), then run:
 
 ```sh
-lead-collector assist --html example.html --source-url https://source.example.test/directory --mapping '{"Name":"company"}' --ai scrapegraph --model ollama/qwen3:0.6b
-```
-
-No daemon or model pull is automatic. Jev preview/replay are contract-only in this build; live Jev remains UNRUN and cost-guarded. Do not use `--allow-metered-jev` without separate explicit authorization.
-
-`--ai` uses user-level `uv` and Python 3.12 for the optional lock, with fixed public PyPI and no inherited configuration or proxy settings. Missing artifacts, Python, or developer tools return named errors.
-
-## Optional SMTP-only email verification
-
-`verify-email` is an explicit, local operation. Ordinary collection and `doctor` never install, start, or probe the optional verifier. Give it only an address already observed in page evidence:
-
-```sh
-lead-collector verify-email --email "$PUBLISHED_EMAIL"
-# Or use a separately built, owner-only runner:
-lead-collector verify-email --email "$PUBLISHED_EMAIL" --reacher-binary /absolute/path/reacher-smtp-check
-```
-
-The default runner location is `.tools/reacher-smtp-check`. Its source is [the SMTP-only Reacher runner](scripts/reacher_smtp_runner/README.md); it is deliberately not downloaded or built by the CLI. The runner binds Reacher v0.11.11 to direct SMTP for every provider class, disables Gravatar and Have I Been Pwned checks, inherits no proxy, credential, or provider environment variables, and never sends SMTP `DATA` or a message.
-
-The JSON result retains `safe`, `risky`, `invalid`, or `unknown`. `mailboxVerified` is true only for a typed `safe` response whose exact input matches the requested address and whose syntax, MX, and SMTP deliverability are affirmative with no catch-all, disabled, or full mailbox. Missing runtime, timeouts, malformed output, contradictions, and uncertain server responses remain unverified named errors.
-
-## Bounded CSV enrichment
-
-Clone `GopalGB/lead-collector`, use Python 3.11+, and bootstrap only the core
-offline wheel set when it is supplied with the checkout:
-
-```sh
-python3 scripts/setup.py --core
-python3 scripts/setup.py --install  # optional launcher
 fridayoutreach enrich --input businesses.csv --output businesses.enriched.csv
 ```
 
-Every run writes `businesses.enriched.safe.csv`, a strict safe-only companion
-with the fixed per-contact columns `company,email,website,phone,address`, source
-URLs/timestamps, native verification status, mailbox status, all six native
-flags, and error. It contains only source-observed literal addresses with syntax,
-MX, and SMTP true; catch-all, disabled, and full false; status `safe`; and no
-error. `lead-collector enrich` remains a legacy alias.
+The native runner is a local prerequisite and is not included in core. On the default path, a missing trusted runner fails before HTTP fetching or output writing.
 
-`enrich` is serial, deterministic, and AI-free. It preflights all rows, paths,
-collision rules, and public HTTP(S) targets before the first fetch. It preserves
-original fields and adds raw `published_emails`, JSON `email_evidence`, JSON
-`email_verification`, `site_status`, and JSON `site_evidence`; every CSV cell
-is formula-safe. Defaults are 20 sites, 3 pages/site, and 100 unique checks;
-hard caps are 100, 5, and 1,000.
+## Output and boundaries
 
-Default enrich verification requires a trusted local Reacher runner. Use
-`--skip-email-verification` for explicit no-SMTP enrichment; an agent request
-with `verify_emails:false` selects the same opt-out:
-
-```sh
-fridayoutreach enrich --input businesses.csv --output businesses.enriched.csv --max-sites 20 --max-pages-per-site 3 --max-emails 100
-```
-
-Email verification is enabled by default. Use `--skip-email-verification` for the explicit no-SMTP path. Missing runtime fails before any fetch or output write;
-uncertain, risky, invalid, unknown, and over-limit checks are never mailbox
-verified. Native source/build prerequisites are in
-[`scripts/reacher_smtp_runner/README.md`](scripts/reacher_smtp_runner/README.md).
-
-## Agent invocation
-
-An agent model requests `friday_outreach_enrich` from
-`integrations/fridayoutreach-function-tool.json`; its trusted host maps that
-function to the fixed local `scripts/agent_tool.py` runner. A text-only model
-cannot execute a URL or local process.
-
-```sh
-printf '%s\n' '{"input_csv":"businesses.csv","output_csv":"businesses.enriched.csv","max_sites":20}' | .venv/bin/python scripts/agent_tool.py --workspace "$PWD"
-```
-
-The FridayOutreach schema is `integrations/fridayoutreach-function-tool.json`.
-The legacy `lead_collector_enrich` schema remains at `integrations/function-tool.json`. The runner
-accepts one JSON object of at most 64 KiB, known bounded fields, and relative
-CSV paths confined to its host workspace. Repeated JSON fields are rejected,
-as are absolute paths, traversal, protected names and symlinked components. It invokes a
-fixed CLI argument list with no shell, SDK, or executable override.
+The full CSV records source observations and statuses, including non-qualifying and error outcomes. The safe projection includes only literal source-observed addresses with a `safe` native result, confirmed mailbox, true syntax/MX/SMTP values, false catch-all/disabled/full-inbox values, and no verification error. See the exact [output schema](docs/OUTPUT-SCHEMA.md) and measured [verification report](docs/VERIFICATION.md).
 
 ```mermaid
 flowchart LR
-  A[Function request] --> B[Local fixed runner]
-  B --> C[CSV and URL preflight]
-  C --> D[Serial scoped fetch]
-  D --> E[Source-linked contacts]
-  F[Atomic formula-safe CSV]
-  E --> G{Explicit no-SMTP opt-out?}
-  G -->|no, default verification| H[Bounded Reacher result]
-  G -->|yes| F
-  H --> F
+  A[Input validation and local capability check] --> B[Bounded page capture]
+  B --> C[Literal contact evidence]
+  C --> D[Local verification or explicit opt-out]
+  D --> E[Full CSV]
+  D --> F[Safe-only CSV for qualifying contacts]
 ```
 
-Examples are fictional. This project makes no universal-site or all-mailboxes-
-verified claim. Existing third-party license notices and native prerequisites
-are included with the corresponding components.
+The diagram shows order, not a promise of any result: default enrichment checks the local verifier before capture; an explicit opt-out records unverified results and cannot qualify safe contacts. Deterministic extraction uses no AI. ScrapeGraphAI is optional and local; Jev live execution is UNRUN and cost-guarded. Windows is not tested.
 
-## Development checks
+## Documentation and contribution
 
-From a source checkout with the core runtime installed, run `python3 scripts/verify.py`. Node.js must be available as `node` on `PATH` for the EGO fixture tests. Storage tests require a fresh owner-private temporary root; do not use a shared `/tmp` ancestor.
+- [Getting started](docs/GETTING-STARTED.md)  -  preview, collection, review, export, and enrichment.
+- [Architecture](docs/ARCHITECTURE.md)  -  validation and data flow.
+- [Output schema](docs/OUTPUT-SCHEMA.md) and [troubleshooting](docs/TROUBLESHOOTING.md).
+- [Agent usage](docs/AGENT-USAGE.md)  -  trusted local function-host contract.
+- [Contributing](CONTRIBUTING.md), [roadmap](ROADMAP.md), and [security policy](SECURITY.md).
 
-```sh
-LEAD_COLLECTOR_TMPDIR="$(mktemp -d "${HOME}/lead-collector-verify.XXXXXX")"
-export TMPDIR="$LEAD_COLLECTOR_TMPDIR"
-command -v node
-node --version
-.venv/bin/python scripts/verify.py
-```
+If FridayOutreach is useful, a star helps others discover it.
 
-These checks run only local doctor, unit, Ruff, and strict MyPy checks; they never install dependencies or activate optional AI. The owner may inspect or remove the dedicated temporary folder after verification.
+## Evidence and license
+
+The verification report records two 368-test native-host passes and two recorded 22-business/48-check replays with four safe results. Those are measured local evidence, not a benchmark; no raw real leads are public. The repository has no root license grant yet; [issue #7](https://github.com/GopalGB/FridayOutreach/issues/7) tracks the maintainer’s license decision.
