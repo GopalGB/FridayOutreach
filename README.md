@@ -116,4 +116,14 @@ are included with the corresponding components.
 
 ## Development checks
 
-From a source checkout with the core runtime installed, run `python3 scripts/verify.py`. It runs only local doctor, unit, Ruff, and strict MyPy checks; it never installs dependencies or activates optional AI.
+From a source checkout with the core runtime installed, run `python3 scripts/verify.py`. Node.js must be available as `node` on `PATH` for the EGO fixture tests. Storage tests require a fresh owner-private temporary root; do not use a shared `/tmp` ancestor.
+
+```sh
+LEAD_COLLECTOR_TMPDIR="$(mktemp -d "${HOME}/lead-collector-verify.XXXXXX")"
+export TMPDIR="$LEAD_COLLECTOR_TMPDIR"
+command -v node
+node --version
+.venv/bin/python scripts/verify.py
+```
+
+These checks run only local doctor, unit, Ruff, and strict MyPy checks; they never install dependencies or activate optional AI. The owner may inspect or remove the dedicated temporary folder after verification.

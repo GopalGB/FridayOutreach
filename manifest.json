@@ -4,11 +4,11 @@
   "coreRequires": "Python3.11+",
   "defaultAi": "off",
   "files": {
-    ".github/workflows/verify.yml": "abed0569ae8f895147eaa175b70c54317109bd65f3a51075449af44897845973",
+    ".github/workflows/verify.yml": "4d480a111ba186596b84993ee628a34dd038a2403f6559bdca3f73c40470f8ec",
     ".gitignore": "9251465406dc97d52546eb7c0d542b14cae3efacb5178f4a1ee0d7d4677b6c02",
-    "README.md": "42667581e91066cddb187a9ff2bf1f7e9453dddacb3bac796400c9d6e8e84a7f",
+    "README.md": "aea99432b2854b6d8dcf1f140612fca542da8daa0779879dbfb033e3e80c93c4",
     "docs/AGENT-USAGE.md": "9c320322bc9e5378311040ee2025260f520117836cb3cdd44d18c4196bab937c",
-    "docs/VERIFICATION.md": "25fd98ed9591cc483a20740afeda82d5eb512cba13a4c8cf2efffdf2a9af4941",
+    "docs/VERIFICATION.md": "4a216a514814ba4d26fbefc4891ffba17806f4238fbcd3581d07cd10c34070be",
     "docs/coverage.json": "fd634f6ac14d04661176ec274d4fd1a31452cfd649bbdb8081e5020b85fa78f0",
     "example.html": "2524ab929ad64726b830f076f7a62a79f4b6d92b3312bf460ca6fb89eef329dd",
     "examples/businesses.csv": "427b19646c53027b88d0ac1db08d0225cbc95712381b49befe6406bc2939e64c",
@@ -69,7 +69,7 @@
     "tests/test_batch_safety.py": "2afaf14a6e307a04192f81838864c0ed6995e39760003677f1cea7d36883368b",
     "tests/test_cli.py": "5f7c3b2d3c8c3c19c57aaa6463ec9c41553354c2fac645ec7e2db4defb23a753",
     "tests/test_contacts.py": "12f84adc10003ee49ebeafcad0dff49347c6fc3e7c8893a16667c6e8729ac176",
-    "tests/test_ego.py": "b12e062ab0ebccd65e21cbb53e5016d4b32779379431098192570eaefcc390c1",
+    "tests/test_ego.py": "8ea51d7438b064ad1ff74b25c4eab0f7663974f09b0adae54a3268177038a17b",
     "tests/test_email_verify.py": "5250bfb6c68fdd2a9a858559b90529c18f399ab19da3d03ffff3a5a04fe4afe3",
     "tests/test_exchange_contract.py": "ff0eed7e2190a7365bdc14b0698e833fe98181d31ce9d4f173423a74897b6689",
     "tests/test_exports.py": "b53f050273c6fb0033ab11f6152a7ca686532877fabdf1014eb4d8f14f68cb66",
@@ -104,7 +104,7 @@
   "reviewGate": {
     "reviewExecuted": false,
     "status": "waived by user",
-    "waiverReceiptSha256": "f7ed191105926326f14992e9a033e649a690716772672c0ee963c4f874a4feec"
+    "waiverReceiptSha256": "83ba70091ec2dd176361f9b322029084c3e7f6bcf67eac8b73d4c46ea37323eb"
   },
-  "sourceDigest": "869a6e28f9774b56f11d8a88ad27220f582d0c500d5b01c828b6d0174fccaa76"
+  "sourceDigest": "860f53e2ea9af73b1ba9f3c552d189a61e5f249732ebd0a9d71cdbdbb29e4001"
 }

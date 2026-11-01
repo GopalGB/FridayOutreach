@@ -43,11 +43,17 @@ Use Python3.11+ and a user-owned virtual environment:
 ```sh
 python3 scripts/setup.py --core
 .venv/bin/python -m pip install --index-url https://pypi.org/simple ruff==0.15.7 mypy==1.9.0 bandit==1.9.4
+LEAD_COLLECTOR_TMPDIR="$(mktemp -d "${HOME}/lead-collector-verify.XXXXXX")"
+export TMPDIR="$LEAD_COLLECTOR_TMPDIR"
 export PATH="$PWD/.venv/bin:$PATH"
+command -v node
+node --version
 .venv/bin/python scripts/verify.py
 .venv/bin/mypy --strict --follow-imports=skip scripts/reacher_smtp_runner/patch_reacher_core.py
 .venv/bin/python -m bandit -r lead_collector scripts -ll
 ```
+
+`node` is required on `PATH` for the EGO fixture subprocesses. `TMPDIR` must be a fresh owner-private directory below the real home directory; a shared `/tmp` ancestor is intentionally rejected by the production storage guard. The owner may inspect or remove the dedicated temporary folder after verification.
 
 The [GitHub workflow](../.github/workflows/verify.yml) runs the portable offline unit/lint/type/SAST checks on a standard public Linux runner. It does not scrape live websites, perform SMTP, call AI, upload artifacts or create caches. Live workflow status is available in [Actions](https://github.com/GopalGB/lead-collector/actions/workflows/verify.yml); this source report does not pre-claim a workflow outcome.
 

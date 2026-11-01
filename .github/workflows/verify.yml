@@ -24,9 +24,15 @@ jobs:
         run: python3 scripts/setup.py --core
       - name: Prepare local verification tools
         run: .venv/bin/python -m pip install --no-cache-dir --index-url https://pypi.org/simple ruff==0.15.7 mypy==1.9.0 bandit==1.9.4
+      - name: Verify Node.js
+        run: |
+          command -v node
+          node --version
       - name: Run offline tests, lint and strict typing
         run: |
           export PATH="$PWD/.venv/bin:$PATH"
+          LEAD_COLLECTOR_TMPDIR="$(mktemp -d "${HOME}/lead-collector-verify.XXXXXX")"
+          export TMPDIR="$LEAD_COLLECTOR_TMPDIR"
           .venv/bin/python scripts/verify.py
           .venv/bin/mypy --strict --follow-imports=skip scripts/reacher_smtp_runner/patch_reacher_core.py
       - name: Check Python source for medium or high findings

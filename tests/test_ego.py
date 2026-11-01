@@ -2,6 +2,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -13,7 +14,9 @@ from lead_collector.model import Selection
 
 SOURCE = "https://directory.example.test/list"
 LIMITS = {"maxInputs": 100, "maxPagesPerHost": 5, "maxRows": 1000, "maxPages": 100}
-NODE_BINARY = Path("/opt/homebrew/bin/node")
+NODE_BINARY = shutil.which("node")
+if NODE_BINARY is None:
+    raise RuntimeError("Node.js executable 'node' is required on PATH for EGO fixture tests.")
 SCOPE_FIXTURE = Path(__file__).parent / "fixtures" / "ego-preaction-scope.mjs"
 WAIT_FIXTURE = Path(__file__).parent / "fixtures" / "ego-wait-timeout.mjs"
 UNAVAILABLE_FIXTURE = Path(__file__).parent / "fixtures" / "ego-unavailable.mjs"
