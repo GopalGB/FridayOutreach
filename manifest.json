@@ -69,7 +69,7 @@
     "tests/test_agent_tool.py": "228484ac4613c4b17c14e5826d7aa54fdeece0bc011b8d8bb1dca6fa238370e5",
     "tests/test_ai.py": "da509e6c0b21425e992a065b6d8fd1ba645c12bd4ead7312034d80086991c2a1",
     "tests/test_ai_runner.py": "36a8514900099b67a626d03f685387b4ff835a846848d5ecb7fd3ebd1ab170a8",
-    "tests/test_batch.py": "928346e43004aecf9d37b93a71d1120d9f9493225234123910ba9401075777f4",
+    "tests/test_batch.py": "b045b31a52cd050eab16290c7b13af64cef3d79bf2a48776afca3574dcffe004",
     "tests/test_batch_safety.py": "2afaf14a6e307a04192f81838864c0ed6995e39760003677f1cea7d36883368b",
     "tests/test_cli.py": "c8fd3f4b179c1b7139664ef0584066179af5364948b197fa3c7007310b9da3fd",
     "tests/test_contacts.py": "12f84adc10003ee49ebeafcad0dff49347c6fc3e7c8893a16667c6e8729ac176",
@@ -118,5 +118,5 @@
   "safeContactsFilename": "<output-stem>.safe.csv",
   "safeContactsPredicate": "literal published address + native Reacher safe + mailboxVerified true + syntax/MX/SMTP true + catchAll/disabled/fullInbox false + no error",
   "skill": "skills/fridayoutreach/SKILL.md",
-  "sourceDigest": "97a5b2c27fe8af7d157af9d20132d17b391456df33e8e178915fba5f3ab455db"
+  "sourceDigest": "44a7f59c60dcaa1823f5361a9779e7544001f2ed44a97f02db8e8fc201673643"
 }

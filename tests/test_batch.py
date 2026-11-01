@@ -139,15 +139,23 @@ class BatchTests(unittest.TestCase):
         self.assertEqual({row["company"] for row in self.safe_rows()}, {"Acme", "Beta"})
 
     def test_safe_output_input_alias_is_rejected_before_fetch(self) -> None:
-        self.input_path = self.root / "Alias.safe.csv"
-        self.output_path = self.root / "alias.csv"
-        self.write_rows([{"company": "Acme", "website": "https://acme.example", "email": "", "note": ""}])
-        original = self.input_path.read_bytes()
-        with patch.object(batch, "fetch_page") as fetch:
-            with self.assertRaises(batch.BatchError):
-                batch.enrich_csv(self.input_path, self.output_path, batch.BatchOptions(verify_emails=False, overwrite=True))
-        fetch.assert_not_called()
-        self.assertEqual(self.input_path.read_bytes(), original)
+        for spelling in ("alias.safe.csv", "Alias.safe.csv"):
+            with self.subTest(spelling=spelling), tempfile.TemporaryDirectory(dir=self.root) as directory:
+                folder = Path(directory)
+                self.input_path, self.output_path = folder / spelling, folder / "alias.csv"
+                self.write_rows([{"company": "Acme", "website": "https://acme.example", "email": "", "note": ""}])
+                original = self.input_path.read_bytes()
+                aliases_input = (folder / "alias.safe.csv").exists()
+                with patch.object(batch, "fetch_page", return_value=_page("https://acme.example/", "No published email")) as fetch:
+                    if aliases_input:
+                        with self.assertRaises(batch.BatchError):
+                            batch.enrich_csv(self.input_path, self.output_path, batch.BatchOptions(verify_emails=False, overwrite=True))
+                        fetch.assert_not_called()
+                    else:
+                        result = batch.enrich_csv(self.input_path, self.output_path, batch.BatchOptions(verify_emails=False, overwrite=True))
+                        self.assertEqual(result["safeContacts"], 0)
+                        fetch.assert_called_once()
+                self.assertEqual(self.input_path.read_bytes(), original)
 
     def test_safe_target_hazards_are_rejected_before_fetch(self) -> None:
         self.write_rows([{"company": "Acme", "website": "https://acme.example", "email": "", "note": ""}])
