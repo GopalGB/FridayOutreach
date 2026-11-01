@@ -4,19 +4,19 @@ Local verification date: 2026-11-01. This report describes measured checks, with
 
 ## Frozen local source
 
-Two consecutive real-host passes completed **348 unittest tests** successfully, Ruff0.15.7 and raw strict MyPy1.9.0 across26production Python files. All production files are counted, including standalone scripts that were not imported. No coverage exclusions were added.
+Two consecutive real-host passes completed **352 unittest tests** successfully, Ruff0.15.7 and raw strict MyPy1.9.0 across26production Python files. All production files are counted, including standalone scripts that were not imported. No coverage exclusions were added.
 
 | Production Python measure | Result |
 | --- | ---: |
-| Lines | 87.1563% |
-| Branches | 80.4317% |
+| Lines | 87.1872% |
+| Branches | 80.5256% |
 | Functions with an executed body statement | 95.8984% |
 
 | New module | Lines | Branches |
 | --- | ---: | ---: |
 | `lead_collector/batch.py` | 88.7892% | 83.9286% |
 | `lead_collector/batch_safety.py` | 96.9388% | 86.6667% |
-| `scripts/agent_tool.py` | 92.9204% | 83.3333% |
+| `scripts/agent_tool.py` | 93.9130% | 87.5000% |
 
 Raw line/branch data is in [coverage.json](coverage.json). Function execution uses at least one non-docstring body statement, not a claim that every path was executed. The full host has the optional local SDK environment and pinned native source; a fresh core checkout deliberately skips tests that need those absent optional artifacts.
 
@@ -60,3 +60,7 @@ The [GitHub workflow](../.github/workflows/verify.yml) runs the portable offline
 ## Optional AI and review
 
 Deterministic collection, enrichment and verification need no AI. ScrapeGraphAI remains an explicit local option with separate SDK/model prerequisites. Jev request/replay contracts are tested; live Jev remains UNRUN under ZERO CHARGE. Claude review was waived by the user and was not run. Local behavior tests, parent review, security checks and artifact verification remain independent gates.
+
+## Default verification in v0.1.1
+
+CSV enrichment and `lead_collector_enrich` verify source-observed email addresses by default. Omitting the option uses the trusted local Reacher runtime; absence fails before any fetch or output write. `--skip-email-verification` or the explicit agent argument `verify_emails:false` selects the no-SMTP path. Raw directory collection and review retain their existing behavior. The default, explicit opt-out and missing-runtime boundaries have direct CLI and actual stdin regression tests. The output-limit test uses actual signal termination rather than a brittle one-second startup race; production deadline and byte limits are unchanged.

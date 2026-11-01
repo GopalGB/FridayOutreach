@@ -36,6 +36,20 @@ class BatchTests(unittest.TestCase):
             writer.writeheader()
             writer.writerows(rows)
 
+    def test_default_verification_reaches_verifier_and_writes_typed_result(self) -> None:
+        self.write_rows([{"company": "Acme", "website": "https://acme.example", "email": "", "note": ""}])
+        verified = VerificationResult("team@acme.example", "safe", True, VerificationDetails(True, True, True, False, False, False), None)
+        with patch.object(batch, "fetch_page", return_value=_page("https://acme.example/", "team@acme.example")), patch.object(batch, "_trusted_binary", return_value=self.root / "runtime"), patch.object(batch, "verify_email", return_value=verified) as verify:
+            summary = batch.enrich_csv(self.input_path, self.output_path)
+        self.assertEqual(verify.call_count, 1)
+        self.assertEqual(verify.call_args.args[0].email, "team@acme.example")
+        self.assertEqual(summary["emailsChecked"], 1)
+        with self.output_path.open(encoding="utf-8") as file:
+            row = next(csv.DictReader(file))
+        result = json.loads(row["email_verification"])[0]
+        self.assertEqual(result["status"], "safe")
+        self.assertTrue(result["mailboxVerified"])
+
     def test_collision_is_rejected_before_any_fetch(self) -> None:
         self.write_rows([{"company": "Acme", "website": "https://acme.example", "email": "", "note": ""}])
         self.output_path.write_text("user output", encoding="utf-8")
@@ -66,7 +80,7 @@ class BatchTests(unittest.TestCase):
 
         with patch.object(batch, "fetch_page", side_effect=edit_input):
             with self.assertRaisesRegex(batch.BatchError, "input changed"):
-                batch.enrich_csv(self.input_path, self.input_path, batch.BatchOptions(overwrite=True))
+                batch.enrich_csv(self.input_path, self.input_path, batch.BatchOptions(verify_emails=False, overwrite=True))
         with self.input_path.open(encoding="utf-8") as file:
             self.assertEqual(next(csv.DictReader(file))["company"], "USER EDIT")
 
@@ -89,7 +103,7 @@ class BatchTests(unittest.TestCase):
 
     def test_formula_prefixes_are_neutralized_in_all_export_cells(self) -> None:
         self.write_rows([{"company": "=2+2", "website": "", "email": "+unsafe@example.test", "note": "@formula"}])
-        batch.enrich_csv(self.input_path, self.output_path)
+        batch.enrich_csv(self.input_path, self.output_path, batch.BatchOptions(verify_emails=False))
         with self.output_path.open(encoding="utf-8") as file:
             row = next(csv.DictReader(file))
         self.assertEqual(row["company"], "'=2+2")
@@ -102,7 +116,7 @@ class BatchTests(unittest.TestCase):
             {"company": "Failed", "website": "https://acme.example", "email": "", "note": ""},
         ])
         with patch.object(batch, "fetch_page", return_value=_page("https://acme.example/", "", "failed")):
-            batch.enrich_csv(self.input_path, self.output_path)
+            batch.enrich_csv(self.input_path, self.output_path, batch.BatchOptions(verify_emails=False))
         with self.output_path.open(encoding="utf-8") as file:
             rows = list(csv.DictReader(file))
         self.assertEqual([row["site_status"] for row in rows], ["no_website", "failed"])

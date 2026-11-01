@@ -7,7 +7,8 @@ local process by itself.
 
 The runner accepts one JSON object of at most 64 KiB and requires relative
 `input_csv` and `output_csv` paths.
-Optional booleans are `verify_emails` and `overwrite`; optional integer caps are
+Optional booleans are `verify_emails` and `overwrite`; `verify_emails` defaults to
+`true` and can be explicitly set to `false` for the no-SMTP path. Optional integer caps are
 `max_sites` (100), `max_pages_per_site` (5), and `max_emails` (1000). Defaults
 are 20, 3, and 100. Duplicate JSON keys, absolute paths, `..`, unknown keys,
 symlink traversal, and malformed types are rejected before work. The trusted
@@ -25,8 +26,10 @@ row, option cap, collision rule, and public HTTP(S) target before any fetch;
 then it fetches serially only within the supplied host plus its bare/www
 counterpart. Output preserves original fields and adds raw `published_emails`,
 JSON `email_evidence`, JSON `email_verification`, `site_status`, and JSON
-`site_evidence`. `--verify-emails` requires a trusted local Reacher runtime and
-preserves safe, risky, invalid, unknown, and not-checked-limit outcomes.
+`site_evidence`. Verification is the default and requires a trusted local Reacher runtime;
+Normal verification preserves safe, risky, invalid, unknown, and
+not-checked-limit outcomes. `--skip-email-verification` is a separate explicit
+no-SMTP opt-out.
 
 A function-calling host registers the schema's name and `input_schema` with
 its model provider. When the model requests `lead_collector_enrich`, the host
@@ -62,9 +65,9 @@ flowchart TD
   I --> P[Validate files, hosts and limits]
   P --> F[Fetch supplied sites and contact pages]
   F --> E[Extract literal published contacts and evidence]
-  E --> V{Verification requested?}
-  V -->|yes| R[Local Reacher DNS and SMTP checks]
-  V -->|no| O[Atomic enriched CSV and JSON summary]
+  E --> V{Explicit no-SMTP opt-out?}
+  V -->|no, default verification| R[Local Reacher DNS and SMTP checks]
+  V -->|yes| O[Atomic enriched CSV and JSON summary]
   R --> O
   O --> H
 ```

@@ -57,9 +57,17 @@ class AgentToolTests(unittest.TestCase):
             self.fail("runner did not emit a string error code")
         return code
 
+    def test_omitted_verification_fails_before_fetch_or_output_when_runtime_is_missing(self) -> None:
+        (self.workspace / "businesses.csv").write_text("company,website\nAcme,https://acme.example\n", encoding="utf-8")
+        patcher = "from unittest.mock import Mock; import lead_collector.batch as b; b._trusted_binary=lambda _: None; fetch=Mock(side_effect=AssertionError('fetch_page called before runtime preflight')); write=Mock(side_effect=AssertionError('write_export called before runtime preflight')); b.fetch_page=fetch; b.write_export=write; from scripts.agent_tool import run; import sys; code=run(['--workspace', sys.argv[2]]); assert not fetch.called; assert not write.called; raise SystemExit(code)"
+        result = subprocess.run([str(RUNNER), "-c", patcher, "--workspace", str(self.workspace)], input=json.dumps({"input_csv": "businesses.csv", "output_csv": "enriched.csv"}), text=True, capture_output=True, cwd=ROOT, check=False, timeout=10)
+        self.assertEqual(result.returncode, 3, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["error"]["code"], "CAPABILITY_UNAVAILABLE")
+        self.assertFalse((self.workspace / "enriched.csv").exists())
+
     def test_runs_from_outside_checkout_with_a_blank_website(self) -> None:
         (self.workspace / "businesses.csv").write_text("company,website\nAcme,\n", encoding="utf-8")
-        result = self.invoke(json.dumps({"input_csv": "businesses.csv", "output_csv": "enriched.csv"}))
+        result = self.invoke(json.dumps({"input_csv": "businesses.csv", "output_csv": "enriched.csv", "verify_emails": False}))
         body = json.loads(result.stdout)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(body["ok"])
@@ -92,7 +100,7 @@ class AgentToolTests(unittest.TestCase):
         self.workspace.joinpath("businesses.csv").write_text("company,website\nAcme,\n", encoding="utf-8")
         self.workspace.joinpath("enriched.csv").write_text("old output", encoding="utf-8")
         status, body = self.invoke_in_process(
-            json.dumps({"input_csv": "businesses.csv", "output_csv": "enriched.csv", "overwrite": True, "max_sites": 1, "max_pages_per_site": 1, "max_emails": 1}).encode()
+            json.dumps({"input_csv": "businesses.csv", "output_csv": "enriched.csv", "verify_emails": False, "overwrite": True, "max_sites": 1, "max_pages_per_site": 1, "max_emails": 1}).encode()
         )
         self.assertEqual(status, 0)
         self.assertTrue(body["ok"])
@@ -157,7 +165,17 @@ class AgentToolTests(unittest.TestCase):
             "overwrite": False,
         }
         self.assertEqual(set(schema["properties"]), expected)
+        self.assertTrue(schema["properties"]["verify_emails"]["default"])
         self.assertEqual(agent_tool._request(json.dumps(request).encode()), request)
+
+    def test_agent_command_defaults_to_verification_and_supports_exact_opt_out(self) -> None:
+        (self.workspace / "businesses.csv").write_text("company,website\nAcme,\n", encoding="utf-8")
+        default = agent_tool._command({"input_csv": "businesses.csv", "output_csv": "enriched.csv"}, self.workspace)
+        opted_out = agent_tool._command({"input_csv": "businesses.csv", "output_csv": "enriched.csv", "verify_emails": False}, self.workspace)
+        self.assertIn("--verify-emails", default)
+        self.assertNotIn("--skip-email-verification", default)
+        self.assertIn("--skip-email-verification", opted_out)
+        self.assertNotIn("--verify-emails", opted_out)
 
 
 if __name__ == "__main__":

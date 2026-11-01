@@ -47,8 +47,8 @@ For an agent tool host, bind `lead_collector_enrich` from
 printf '%s\n' '{"input_csv":"businesses.csv","output_csv":"enriched.csv"}' | .venv/bin/python scripts/agent_tool.py --workspace "$PWD"
 ```
 
-Email verification is optional and must be explicitly requested with
-`--verify-emails`; it uses only a trusted local Reacher runtime. Never infer an
+Email verification is enabled by default and uses only a trusted local Reacher runtime.
+Use `--skip-email-verification` only for an explicit no-SMTP request. Never infer an
 address, widen a domain, send mail, or treat uncertain verification as safe.
 
 The optional runner is not downloaded or built automatically. See

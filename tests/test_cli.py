@@ -1,3 +1,4 @@
+import csv
 import hashlib
 import json
 from contextlib import redirect_stdout
@@ -11,6 +12,7 @@ import unittest
 from unittest.mock import patch
 
 from lead_collector import cli
+from lead_collector import batch
 from lead_collector.ai import AiError, AiResult, AiSuggestion
 from lead_collector.cli import main
 from lead_collector.email_verify import VerificationDetails, VerificationResult
@@ -45,6 +47,34 @@ def invoke(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
 
 
 class CliTests(unittest.TestCase):
+    def test_enrich_defaults_and_positive_flag_verify_while_skip_is_no_smtp(self):
+        document = PageDocument("https://acme.example/", "team@acme.example", "2026-11-01T00:00:00Z", hashlib.sha256(b"team@acme.example").hexdigest(), "completed", None)
+        safe = VerificationResult("team@acme.example", "safe", True, VerificationDetails(True, True, True, False, False, False), None)
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as temp_dir:
+            root = Path(temp_dir).resolve()
+            for suffix, flags in (("default", ()), ("positive", ("--verify-emails",))):
+                with self.subTest(suffix=suffix):
+                    input_path = root / f"{suffix}.csv"
+                    output_path = root / f"{suffix}.enriched.csv"
+                    input_path.write_text("company,website\nAcme,https://acme.example\n", encoding="utf-8")
+                    output = StringIO()
+                    with redirect_stdout(output), patch.object(batch, "_trusted_binary", return_value=root / "runtime"), patch.object(batch, "fetch_page", return_value=document), patch.object(batch, "verify_email", return_value=safe) as verify:
+                        exit_code = main(["enrich", "--input", str(input_path), "--output", str(output_path), *flags])
+                    self.assertEqual(exit_code, 0, output.getvalue())
+                    self.assertTrue(json.loads(output.getvalue())["ok"])
+                    verify.assert_called_once()
+                    with output_path.open(encoding="utf-8") as file:
+                        self.assertEqual(json.loads(next(csv.DictReader(file))["email_verification"])[0]["status"], "safe")
+            input_path = root / "skip.csv"
+            output_path = root / "skip.enriched.csv"
+            input_path.write_text("company,website\nAcme,https://acme.example\n", encoding="utf-8")
+            output = StringIO()
+            with redirect_stdout(output), patch.object(batch, "fetch_page", return_value=document), patch.object(batch, "verify_email", side_effect=AssertionError("skip called verifier")) as verify:
+                exit_code = main(["enrich", "--input", str(input_path), "--output", str(output_path), "--skip-email-verification"])
+            self.assertEqual(exit_code, 0, output.getvalue())
+            verify.assert_not_called()
+            with output_path.open(encoding="utf-8") as file:
+                self.assertEqual(json.loads(next(csv.DictReader(file))["email_verification"])[0]["status"], "not_checked")
     def test_verify_email_uses_the_explicit_binary_and_returns_typed_result(self):
         result = VerificationResult(
             "hello@example.test",

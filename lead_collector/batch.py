@@ -37,7 +37,7 @@ class BatchOptions:
     max_sites: int = DEFAULTS["max_sites"]
     max_pages_per_site: int = DEFAULTS["max_pages_per_site"]
     max_emails: int = DEFAULTS["max_emails"]
-    verify_emails: bool = False
+    verify_emails: bool = True
     overwrite: bool = False
     reacher_binary: Path | None = None
 

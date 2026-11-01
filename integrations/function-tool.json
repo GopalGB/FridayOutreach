@@ -8,7 +8,7 @@
     "properties": {
       "input_csv": {"type": "string"},
       "output_csv": {"type": "string"},
-      "verify_emails": {"type": "boolean"},
+      "verify_emails": {"type": "boolean", "default": true},
       "max_sites": {"type": "integer", "minimum": 1, "maximum": 100},
       "max_pages_per_site": {"type": "integer", "minimum": 1, "maximum": 5},
       "max_emails": {"type": "integer", "minimum": 1, "maximum": 1000},

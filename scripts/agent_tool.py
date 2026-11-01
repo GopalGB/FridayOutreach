@@ -104,9 +104,12 @@ def _command(request: JsonObject, workspace: Path) -> list[str]:
     input_path = _child_path(workspace, input_name, True)
     output_path = _child_path(workspace, output_name, False)
     command = ["enrich", "--input", str(input_path), "--output", str(output_path)]
-    for key, flag in (("verify_emails", "--verify-emails"), ("overwrite", "--overwrite")):
-        if request.get(key) is True:
-            command.append(flag)
+    if request.get("verify_emails", True):
+        command.append("--verify-emails")
+    else:
+        command.append("--skip-email-verification")
+    if request.get("overwrite") is True:
+        command.append("--overwrite")
     for key, flag in (("max_sites", "--max-sites"), ("max_pages_per_site", "--max-pages-per-site"), ("max_emails", "--max-emails")):
         if key in request:
             command.extend((flag, str(request[key])))

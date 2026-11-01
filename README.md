@@ -71,13 +71,15 @@ original fields and adds raw `published_emails`, JSON `email_evidence`, JSON
 is formula-safe. Defaults are 20 sites, 3 pages/site, and 100 unique checks;
 hard caps are 100, 5, and 1,000.
 
-Verification is opt-in and uses only a trusted local Reacher runner:
+Default enrich verification requires a trusted local Reacher runner. Use
+`--skip-email-verification` for explicit no-SMTP enrichment; an agent request
+with `verify_emails:false` selects the same opt-out:
 
 ```sh
-lead-collector enrich --input businesses.csv --output businesses.enriched.csv --verify-emails --max-sites 20 --max-pages-per-site 3 --max-emails 100
+lead-collector enrich --input businesses.csv --output businesses.enriched.csv --max-sites 20 --max-pages-per-site 3 --max-emails 100
 ```
 
-No SMTP occurs without `--verify-emails`. Missing runtime fails before work;
+Email verification is enabled by default. Use `--skip-email-verification` for the explicit no-SMTP path. Missing runtime fails before any fetch or output write;
 uncertain, risky, invalid, unknown, and over-limit checks are never mailbox
 verified. Native source/build prerequisites are in
 [`scripts/reacher_smtp_runner/README.md`](scripts/reacher_smtp_runner/README.md).
@@ -103,10 +105,10 @@ flowchart LR
   B --> C[CSV and URL preflight]
   C --> D[Serial scoped fetch]
   D --> E[Source-linked contacts]
-  E --> F[Atomic formula-safe CSV]
-  E --> G{Explicit local SMTP?}
-  G -->|yes| H[Bounded Reacher result]
-  G -->|no| F
+  F[Atomic formula-safe CSV]
+  E --> G{Explicit no-SMTP opt-out?}
+  G -->|no, default verification| H[Bounded Reacher result]
+  G -->|yes| F
   H --> F
 ```
 

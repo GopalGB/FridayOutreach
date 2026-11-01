@@ -1,8 +1,9 @@
 import json
 import os
 from pathlib import Path
+import subprocess
 import tempfile
-import time
+from typing import Any, Callable, cast
 import unittest
 from unittest.mock import patch
 
@@ -91,11 +92,19 @@ class EmailVerifyTests(unittest.TestCase):
             binary = Path(temp_dir) / "reacher-smtp-check"
             binary.write_text("#!/bin/sh\nhead -c 65536 /dev/zero\nsleep 5\n")
             binary.chmod(0o700)
-            started = time.monotonic()
-            with patch("lead_collector.email_verify.VERIFY_DEADLINE_SECONDS", 1):
+            processes: list[subprocess.Popen[bytes]] = []
+            real_popen = cast(Callable[..., subprocess.Popen[bytes]], subprocess.Popen)
+
+            def retain_popen(*args: Any, **kwargs: Any) -> subprocess.Popen[bytes]:
+                process = real_popen(*args, **kwargs)
+                processes.append(process)
+                return process
+
+            with patch("lead_collector.email_verify.subprocess.Popen", side_effect=retain_popen):
                 result = verify_email(EmailVerifyRequest(EMAIL, binary))
 
-        self.assertLess(time.monotonic() - started, 2)
+        self.assertEqual(len(processes), 1)
+        self.assertLess(processes[0].returncode, 0)
         self.assertEqual(result.status, "unknown")
         self.assertFalse(result.mailbox_verified)
         self.assertEqual(result.error, VerificationError("VERIFY_OUTPUT_INVALID", "native verifier response was invalid"))
