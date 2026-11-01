@@ -239,6 +239,13 @@ def _install_paths() -> tuple[Path, Path, Path]:
     return launcher, skill_root, skill_root / "SKILL.md"
 
 
+def _friday_install_paths() -> tuple[Path, Path, Path]:
+    home = Path.home()
+    launcher = home / ".local" / "bin" / "fridayoutreach"
+    skill_root = home / ".codex" / "skills" / "fridayoutreach"
+    return launcher, skill_root, skill_root / "SKILL.md"
+
+
 def _preflight_install() -> tuple[Path, Path, Path, bytes, str]:
     source = PROJECT / "skills" / "lead-collector" / "SKILL.md"
     if not source.is_file():
@@ -250,6 +257,15 @@ def _preflight_install() -> tuple[Path, Path, Path, bytes, str]:
     skill = source.read_bytes()
     _target_matches(launcher, _launcher().encode("utf-8"), "SETUP_LAUNCHER_EXISTS")
     _target_matches(destination, skill, "SETUP_SKILL_EXISTS")
+    friday_source = PROJECT / "skills" / "fridayoutreach" / "SKILL.md"
+    if friday_source.is_file():
+        friday_launcher, friday_root, friday_destination = _friday_install_paths()
+        for directory in (friday_launcher.parent.parent, friday_launcher.parent, friday_root.parent.parent, friday_root.parent, friday_root):
+            _regular_directory(directory, "SETUP_TARGET_UNSAFE")
+        friday_skill = friday_source.read_bytes()
+        friday_text = _launcher()
+        _target_matches(friday_launcher, friday_text.encode("utf-8"), "SETUP_LAUNCHER_EXISTS")
+        _target_matches(friday_destination, friday_skill, "SETUP_SKILL_EXISTS")
     return launcher, skill_root, destination, skill, _launcher()
 
 
@@ -272,6 +288,22 @@ def _install() -> None:
         _target_matches(launcher, launcher_text.encode("utf-8"), "SETUP_LAUNCHER_EXISTS")
     if not _write_new(destination, skill, 0o644):
         _target_matches(destination, skill, "SETUP_SKILL_EXISTS")
+    friday_source = PROJECT / "skills" / "fridayoutreach" / "SKILL.md"
+    if not friday_source.is_file():
+        return
+    friday_launcher, friday_root, friday_destination = _friday_install_paths()
+    for directory in (friday_launcher.parent.parent, friday_launcher.parent, friday_root.parent.parent, friday_root.parent, friday_root):
+        _regular_directory(directory, "SETUP_TARGET_UNSAFE")
+    friday_skill = friday_source.read_bytes()
+    friday_text = _launcher()
+    _target_matches(friday_launcher, friday_text.encode("utf-8"), "SETUP_LAUNCHER_EXISTS")
+    _target_matches(friday_destination, friday_skill, "SETUP_SKILL_EXISTS")
+    friday_launcher.parent.mkdir(parents=True, exist_ok=True)
+    friday_root.mkdir(parents=True, exist_ok=True)
+    if not _write_new(friday_launcher, friday_text.encode("utf-8"), 0o755):
+        _target_matches(friday_launcher, friday_text.encode("utf-8"), "SETUP_LAUNCHER_EXISTS")
+    if not _write_new(friday_destination, friday_skill, 0o644):
+        _target_matches(friday_destination, friday_skill, "SETUP_SKILL_EXISTS")
 
 
 def main(arguments: list[str] | None = None) -> int:

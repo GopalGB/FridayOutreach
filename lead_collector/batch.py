@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Mapping
 from urllib.parse import urlsplit
 
-from .batch_safety import BatchSafetyError, InputBinding, assert_unchanged, read_input, validate_output
+from .batch_safety import BatchSafetyError, InputBinding, assert_unchanged, matches_binding, read_input, validate_output
 from .email_verify import EmailVerifyRequest, VerificationError, VerificationResult, _default_binary, _trusted_binary, verify_email
 from .exports import ExportError, _formula_safe, write_export
 from .extract import parse_contacts
@@ -21,6 +21,11 @@ from .transport import TransportError, fetch_page, validate_fetch_request
 DEFAULTS = {"max_sites": 20, "max_pages_per_site": 3, "max_emails": 100}
 BOUNDS = {"max_sites": 100, "max_pages_per_site": 5, "max_emails": 1000}
 _ADDED = ("published_emails", "email_evidence", "email_verification", "site_status", "site_evidence")
+SAFE_COLUMNS = (
+    "company", "email", "website", "phone", "address", "email_source_urls", "observed_at",
+    "verification_status", "mailbox_verified", "syntax_valid", "mx_accepts_mail",
+    "smtp_deliverable", "catch_all", "disabled", "full_inbox", "verification_error",
+)
 
 
 class BatchError(ValueError):
@@ -276,6 +281,65 @@ def _verify_runtime(options: BatchOptions) -> None:
         raise BatchError("CAPABILITY_UNAVAILABLE", "SMTP verifier runtime is unavailable")
 
 
+def _safe_output_path(output_path: Path) -> Path:
+    suffix = output_path.suffix or ".csv"
+    return output_path.with_name(f"{output_path.stem}.safe{suffix}")
+
+
+def _safe_contact(item: ObservedValue, state: VerificationState | None) -> bool:
+    result = None if state is None or state.limited else state.result
+    if result is None or result.email != item.raw or result.status != "safe" or not result.mailbox_verified or result.error is not None:
+        return False
+    details = result.details
+    return (
+        details.syntax_valid and details.mx_accepts_mail and details.smtp_deliverable
+        and not details.catch_all and not details.disabled and not details.full_inbox
+    )
+
+
+def _value(row: dict[str, str], name: str) -> str:
+    return next((value for key, value in row.items() if key.casefold() == name), "")
+
+
+def _safe_rows(captures: tuple[RowCapture, ...], states: dict[str, VerificationState]) -> tuple[dict[str, str], ...]:
+    grouped: dict[tuple[tuple[str, str, str, str], str], list[ObservedValue]] = {}
+    for capture in captures:
+        contacts = _row_contacts(capture)
+        business = (
+            _value(capture.row, "company"), _value(capture.row, "website"),
+            _value(capture.row, "address"), _value(capture.row, "phone"),
+        )
+        for raw in dict.fromkeys(item.raw for item in contacts):
+            matching = tuple(item for item in contacts if item.raw == raw)
+            if not _safe_contact(matching[0], states.get(raw)):
+                continue
+            grouped.setdefault((business, raw), []).extend(matching)
+    rows: list[dict[str, str]] = []
+    for (business, raw), observations in grouped.items():
+        result = states[raw].result
+        assert result is not None
+        details = result.details
+        rows.append({
+            "company": business[0], "email": raw, "website": business[1], "phone": business[3], "address": business[2],
+            "email_source_urls": "; ".join(dict.fromkeys(item.source_url for item in observations)),
+            "observed_at": "; ".join(dict.fromkeys(item.observed_at for item in observations)),
+            "verification_status": result.status, "mailbox_verified": str(result.mailbox_verified).lower(),
+            "syntax_valid": str(details.syntax_valid).lower(), "mx_accepts_mail": str(details.mx_accepts_mail).lower(),
+            "smtp_deliverable": str(details.smtp_deliverable).lower(), "catch_all": str(details.catch_all).lower(),
+            "disabled": str(details.disabled).lower(), "full_inbox": str(details.full_inbox).lower(), "verification_error": "",
+        })
+    return tuple(rows)
+
+
+def _safe_csv_text(rows: tuple[dict[str, str], ...]) -> str:
+    output = io.StringIO(newline="")
+    writer = csv.writer(output, lineterminator="\n")
+    writer.writerow(SAFE_COLUMNS)
+    for row in rows:
+        writer.writerow([_formula_safe(row[field]) for field in SAFE_COLUMNS])
+    return output.getvalue()
+
+
 def enrich_csv(input_path: Path, output_path: Path, options: BatchOptions = BatchOptions()) -> JsonObject:
     """Enrich one CSV while preserving fields, rows, and source observations."""
 
@@ -283,16 +347,22 @@ def enrich_csv(input_path: Path, output_path: Path, options: BatchOptions = Batc
         _validate_options(options)
         table = _read_input(input_path)
         output = validate_output(output_path, options.overwrite)
+        safe_output = validate_output(_safe_output_path(output_path), options.overwrite)
+        output_is_input = matches_binding(output, table.binding)
+        if safe_output == output or matches_binding(safe_output, table.binding):
+            raise BatchError("INPUT_INVALID", "safe output collides with another path")
         plans = _plans(table, options)
         _verify_runtime(options)
         captures = _captures(table, plans, options)
         states = _verification_states(_unique_emails(captures), options)
         rows = tuple(_output_row(capture, states, options.verify_emails) for capture in captures)
-        if table.binding.path == output:
+        safe_rows = _safe_rows(captures, states) if options.verify_emails else ()
+        if output_is_input:
             assert_unchanged(table.binding)
         write_export(output, _csv_text(table.headers, rows), overwrite=options.overwrite)
+        write_export(safe_output, _safe_csv_text(safe_rows), overwrite=options.overwrite)
     except BatchSafetyError as exc:
         raise BatchError(exc.code, exc.message) from exc
     except ExportError as exc:
         raise BatchError(exc.code, str(exc)) from exc
-    return {"input": str(input_path), "output": str(output_path), "rows": len(table.rows), "sitesAttempted": sum(plan.eligible for plan in plans), "emailsChecked": sum(state.result is not None and not state.limited for state in states.values()), "inputSha256": table.binding.sha256}
+    return {"input": str(input_path), "output": str(output_path), "safeContactsOutput": str(safe_output), "safeContacts": len(safe_rows), "rows": len(table.rows), "sitesAttempted": sum(plan.eligible for plan in plans), "emailsChecked": sum(state.result is not None and not state.limited for state in states.values()), "inputSha256": table.binding.sha256}

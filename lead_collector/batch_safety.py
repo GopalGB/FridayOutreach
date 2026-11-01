@@ -133,3 +133,13 @@ def assert_unchanged(binding: InputBinding) -> None:
         raise BatchSafetyError("INPUT_CHANGED", "input changed during enrichment")
     if hashlib.sha256(raw).hexdigest() != binding.sha256:
         raise BatchSafetyError("INPUT_CHANGED", "input changed during enrichment")
+
+
+def matches_binding(path: Path, binding: InputBinding) -> bool:
+    """Return whether an existing path names the already-opened input file."""
+
+    try:
+        metadata = path.lstat()
+    except FileNotFoundError:
+        return False
+    return metadata.st_dev == binding.device and metadata.st_ino == binding.inode

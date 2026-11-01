@@ -1,6 +1,7 @@
 # Agent usage
 
-The model selects `lead_collector_enrich` from `integrations/function-tool.json`.
+The model selects `lead_collector_enrich` from `integrations/function-tool.json`, or
+`friday_outreach_enrich` from `integrations/fridayoutreach-function-tool.json`.
 The host validates the request and runs `scripts/agent_tool.py` in a trusted
 workspace. A model that can only produce text cannot execute a GitHub URL or
 local process by itself.
@@ -20,6 +21,10 @@ For a direct CLI workflow:
 ```sh
 lead-collector enrich --input businesses.csv --output businesses.enriched.csv
 ```
+
+Every successful enrichment also writes `businesses.enriched.safe.csv`. It is
+strictly safe-only and header-only when verification is skipped or no contact
+passes; the JSON result reports `safeContactsOutput` and `safeContacts`.
 
 The batch path is deterministic and does not call AI. It preflights every CSV
 row, option cap, collision rule, and public HTTP(S) target before any fetch;
@@ -67,7 +72,7 @@ flowchart TD
   F --> E[Extract literal published contacts and evidence]
   E --> V{Explicit no-SMTP opt-out?}
   V -->|no, default verification| R[Local Reacher DNS and SMTP checks]
-  V -->|yes| O[Atomic enriched CSV and JSON summary]
+  V -->|yes| O[Full CSV, safe-only CSV and JSON summary]
   R --> O
   O --> H
 ```

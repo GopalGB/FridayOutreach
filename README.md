@@ -1,20 +1,21 @@
-# Lead Collector
+# FridayOutreach
 
-Lead Collector is a local-first scraper for fictional or explicitly approved public pages. It extracts company rows and published contact links into a reviewable SQLite job. It does not send leads or perform outreach.
+FridayOutreach is a local-first scraper for fictional or explicitly approved public pages. It extracts company rows and published contact links into a reviewable SQLite job. It does not send leads or perform outreach.
 
 ## Quick start
 
 ```sh
-git clone https://github.com/GopalGB/lead-collector.git
-cd lead-collector
+git clone https://github.com/GopalGB/FridayOutreach.git
+cd FridayOutreach
 python3 scripts/setup.py --core
-.venv/bin/python lead.py doctor
+python3 scripts/setup.py --install
+fridayoutreach doctor
 ```
 
-`--core` installs only the hash-locked local wheels. It does not contact an index, start a model service, pull a model, discover credentials, or call a provider. `--install` adds the optional local launcher and skill; the launcher is `~/.local/bin/lead-collector`.
+`--core` installs only the hash-locked local wheels. It does not contact an index, start a model service, pull a model, discover credentials, or call a provider. `--install` adds the local FridayOutreach launcher and skill; the launcher is `~/.local/bin/fridayoutreach`.
 
-Run `python3 scripts/setup.py --install` to install that launcher, or replace
-`lead-collector` in the examples with `.venv/bin/python lead.py` from the clone.
+Run `python3 scripts/setup.py --install` to install that launcher, or use
+`.venv/bin/python lead.py` from the clone. `lead-collector` remains a legacy alias.
 
 ## Reviewable offline workflow
 
@@ -61,8 +62,15 @@ offline wheel set when it is supplied with the checkout:
 ```sh
 python3 scripts/setup.py --core
 python3 scripts/setup.py --install  # optional launcher
-lead-collector enrich --input businesses.csv --output businesses.enriched.csv
+fridayoutreach enrich --input businesses.csv --output businesses.enriched.csv
 ```
+
+Every run writes `businesses.enriched.safe.csv`, a strict safe-only companion
+with the fixed per-contact columns `company,email,website,phone,address`, source
+URLs/timestamps, native verification status, mailbox status, all six native
+flags, and error. It contains only source-observed literal addresses with syntax,
+MX, and SMTP true; catch-all, disabled, and full false; status `safe`; and no
+error. `lead-collector enrich` remains a legacy alias.
 
 `enrich` is serial, deterministic, and AI-free. It preflights all rows, paths,
 collision rules, and public HTTP(S) targets before the first fetch. It preserves
@@ -76,7 +84,7 @@ Default enrich verification requires a trusted local Reacher runner. Use
 with `verify_emails:false` selects the same opt-out:
 
 ```sh
-lead-collector enrich --input businesses.csv --output businesses.enriched.csv --max-sites 20 --max-pages-per-site 3 --max-emails 100
+fridayoutreach enrich --input businesses.csv --output businesses.enriched.csv --max-sites 20 --max-pages-per-site 3 --max-emails 100
 ```
 
 Email verification is enabled by default. Use `--skip-email-verification` for the explicit no-SMTP path. Missing runtime fails before any fetch or output write;
@@ -86,14 +94,17 @@ verified. Native source/build prerequisites are in
 
 ## Agent invocation
 
-An agent model requests `lead_collector_enrich`; its trusted tool host executes
-the local runner. A text-only model cannot execute a URL or local process.
+An agent model requests `friday_outreach_enrich` from
+`integrations/fridayoutreach-function-tool.json`; its trusted host maps that
+function to the fixed local `scripts/agent_tool.py` runner. A text-only model
+cannot execute a URL or local process.
 
 ```sh
 printf '%s\n' '{"input_csv":"businesses.csv","output_csv":"businesses.enriched.csv","max_sites":20}' | .venv/bin/python scripts/agent_tool.py --workspace "$PWD"
 ```
 
-The provider-neutral schema is `integrations/function-tool.json`. The runner
+The FridayOutreach schema is `integrations/fridayoutreach-function-tool.json`.
+The legacy `lead_collector_enrich` schema remains at `integrations/function-tool.json`. The runner
 accepts one JSON object of at most 64 KiB, known bounded fields, and relative
 CSV paths confined to its host workspace. Repeated JSON fields are rejected,
 as are absolute paths, traversal, protected names and symlinked components. It invokes a

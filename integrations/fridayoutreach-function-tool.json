@@ -1,0 +1,18 @@
+{
+  "name": "friday_outreach_enrich",
+  "description": "Run deterministic FridayOutreach enrichment and return full output plus safeContactsOutput.",
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["input_csv", "output_csv"],
+    "properties": {
+      "input_csv": {"type": "string"},
+      "output_csv": {"type": "string"},
+      "verify_emails": {"type": "boolean", "default": true},
+      "max_sites": {"type": "integer", "minimum": 1, "maximum": 100},
+      "max_pages_per_site": {"type": "integer", "minimum": 1, "maximum": 5},
+      "max_emails": {"type": "integer", "minimum": 1, "maximum": 1000},
+      "overwrite": {"type": "boolean"}
+    }
+  }
+}

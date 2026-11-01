@@ -72,6 +72,10 @@ class AgentToolTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(body["ok"])
         self.assertTrue((self.workspace / "enriched.csv").is_file())
+        safe = self.workspace / "enriched.safe.csv"
+        self.assertTrue(safe.is_file())
+        self.assertEqual(body["data"]["safeContacts"], 0)
+        self.assertEqual(body["data"]["safeContactsOutput"], str(safe))
 
     def test_rejects_path_escape_and_symlinks_without_output(self) -> None:
         (self.workspace / "businesses.csv").write_text("company,website\nAcme,\n", encoding="utf-8")
@@ -105,6 +109,24 @@ class AgentToolTests(unittest.TestCase):
         self.assertEqual(status, 0)
         self.assertTrue(body["ok"])
         self.assertTrue(self.workspace.joinpath("enriched.csv").is_file())
+
+    def test_friday_outreach_schema_and_safe_output_contract(self) -> None:
+        schema = json.loads((ROOT / "integrations" / "fridayoutreach-function-tool.json").read_text(encoding="utf-8"))
+        self.assertEqual(schema["name"], "friday_outreach_enrich")
+        self.assertIn("safeContactsOutput", schema["description"])
+
+    def test_in_process_safe_default_returns_a_safe_companion(self) -> None:
+        self.workspace.joinpath("businesses.csv").write_text("company,website\nAcme,https://acme.example\n", encoding="utf-8")
+        from lead_collector.email_verify import VerificationDetails, VerificationResult
+        from lead_collector.model import PageDocument
+        document = PageDocument("https://acme.example/", "Team@acme.example", "2026-11-01T00:00:00Z", "0" * 64, "completed", None)
+        result = VerificationResult("Team@acme.example", "safe", True, VerificationDetails(True, True, True, False, False, False), None)
+        with patch("lead_collector.batch._trusted_binary", return_value=self.workspace / "runtime"), patch("lead_collector.batch.fetch_page", return_value=document), patch("lead_collector.batch.verify_email", return_value=result):
+            status, body = self.invoke_in_process(json.dumps({"input_csv": "businesses.csv", "output_csv": "enriched.csv"}).encode())
+        self.assertEqual(status, 0)
+        self.assertTrue(body["ok"])
+        self.assertEqual(body["data"]["safeContacts"], 1)
+        self.assertIn("Team@acme.example", self.workspace.joinpath("enriched.safe.csv").read_text(encoding="utf-8"))
 
     def test_in_process_runner_rejects_malformed_requests_without_writing_output(self) -> None:
         deep = b'{"input_csv":"businesses.csv","output_csv":"out.csv","extra":' + b"[" * 1500 + b"0" + b"]" * 1500 + b"}"

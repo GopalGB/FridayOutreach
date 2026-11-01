@@ -4,19 +4,21 @@ Local verification date: 2026-11-01. This report describes measured checks, with
 
 ## Frozen local source
 
-Two consecutive real-host passes completed **352 unittest tests** successfully, Ruff0.15.7 and raw strict MyPy1.9.0 across26production Python files. All production files are counted, including standalone scripts that were not imported. No coverage exclusions were added.
+Two consecutive real-host passes completed **368 unittest tests** successfully, Ruff0.15.7 and raw strict MyPy1.9.0 across26production Python files. All production files are counted, including standalone scripts that were not imported. No coverage exclusions were added.
 
 | Production Python measure | Result |
 | --- | ---: |
-| Lines | 87.1872% |
-| Branches | 80.5256% |
-| Functions with an executed body statement | 95.8984% |
+| Lines | 87.5579% |
+| Branches | 81.2096% |
+| Functions with an executed body statement | 95.9538% |
 
 | New module | Lines | Branches |
 | --- | ---: | ---: |
-| `lead_collector/batch.py` | 88.7892% | 83.9286% |
-| `lead_collector/batch_safety.py` | 96.9388% | 86.6667% |
+| `lead_collector/batch.py` | 91.3208% | 88.8889% |
+| `lead_collector/batch_safety.py` | 97.1154% | 86.6667% |
 | `scripts/agent_tool.py` | 93.9130% | 87.5000% |
+
+The installer also passed 95.3846% line coverage and 88.2353% branch coverage.
 
 Raw line/branch data is in [coverage.json](coverage.json). Function execution uses at least one non-docstring body statement, not a claim that every path was executed. The full host has the optional local SDK environment and pinned native source; a fresh core checkout deliberately skips tests that need those absent optional artifacts.
 
@@ -64,3 +66,11 @@ Deterministic collection, enrichment and verification need no AI. ScrapeGraphAI 
 ## Default verification in v0.1.1
 
 CSV enrichment and `lead_collector_enrich` verify source-observed email addresses by default. Omitting the option uses the trusted local Reacher runtime; absence fails before any fetch or output write. `--skip-email-verification` or the explicit agent argument `verify_emails:false` selects the no-SMTP path. Raw directory collection and review retain their existing behavior. The default, explicit opt-out and missing-runtime boundaries have direct CLI and actual stdin regression tests. The output-limit test uses actual signal termination rather than a brittle one-second startup race; production deadline and byte limits are unchanged.
+
+## FridayOutreach automatic safe exports
+
+Every successful `fridayoutreach enrich` invocation writes the complete enriched CSV and a separate `<output-stem>.safe.csv`, including a header-only companion when no contacts qualify or verification was explicitly skipped. The safe export uses dedicated contact fields and requires literal publication evidence, native Reacher `safe`, mailbox confirmation, positive syntax/MX/SMTP flags, false catch-all/disabled/full-inbox flags, and no verification error. Duplicate exact business/email observations combine their source URLs while distinct addresses remain separate.
+
+Regression checks cover case-insensitive input aliases, output collisions and unsafe links before fetch, unchecked input email exclusion, strict status/flag failures, source ownership, cold/idempotent installation, and preservation of unknown installation targets. Both clean extracted installations passed actual CLI and agent-stdin calls, including visible missing-native errors and empty safe companions for the explicit no-SMTP path.
+
+The previously recorded real-directory dataset of22businesses and48native checks was replayed twice offline through the current agent runner. Both replays produced exactly4safe contacts with identical CSV bytes; the recorded outcomes were4safe,41risky,3invalid. These are replays of the original check snapshot, not fresh SMTP checks. The update performed no AI inference for extraction/verification, guessed no emails, and sent no messages. The public payload includes no real lead data.

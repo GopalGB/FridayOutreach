@@ -205,6 +205,92 @@ class SetupTests(unittest.TestCase):
                 (release / "skills" / "lead-collector" / "SKILL.md").read_bytes(),
             )
 
+    def test_friday_launcher_cold_installs_and_is_idempotent_from_lead_collector_checkout(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            release = root / "lead-collector"
+            shutil.copytree(ROOT, release, ignore=shutil.ignore_patterns(".git", ".planning", ".venv", ".venv-ai", "__pycache__", "dist"))
+            home = (root / "home").resolve()
+            environment = {"HOME": str(home), "PATH": os.environ["PATH"], "UV_OFFLINE": "1"}
+            setup = [sys.executable, str(release / "scripts" / "setup.py")]
+            self._command(setup + ["--core", "--install"], release, environment)
+            friday = home / ".local" / "bin" / "fridayoutreach"
+            self.assertIn('"ok":true', self._command([str(friday), "doctor"], root, environment))
+            self._command(setup + ["--install"], release, environment)
+            self.assertEqual(
+                (home / ".codex" / "skills" / "fridayoutreach" / "SKILL.md").read_bytes(),
+                (release / "skills" / "fridayoutreach" / "SKILL.md").read_bytes(),
+            )
+
+    def test_unknown_friday_target_blocks_all_installation_writes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = root / "release"
+            home = root / "home"
+            self._runtime(project)
+            self._skill(project)
+            friday = project / "skills" / "fridayoutreach" / "SKILL.md"
+            friday.parent.mkdir(parents=True)
+            friday.write_text("friday", encoding="utf-8")
+            target = home / ".local" / "bin" / "fridayoutreach"
+            target.parent.mkdir(parents=True)
+            target.write_text("user-owned", encoding="utf-8")
+            with patch.object(setup_script, "PROJECT", project), patch.object(setup_script.Path, "home", return_value=home):
+                with self.assertRaisesRegex(RuntimeError, "SETUP_LAUNCHER_EXISTS"):
+                    setup_script._install()
+            self.assertFalse((home / ".local" / "bin" / "lead-collector").exists())
+            self.assertEqual(target.read_text(encoding="utf-8"), "user-owned")
+
+    def test_installer_keeps_real_paths_and_known_targets_for_both_aliases(self) -> None:
+        for include_friday in (False, True):
+            with self.subTest(include_friday=include_friday), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                project, home = root / "lead-collector", root / "home"
+                self._runtime(project)
+                self._skill(project)
+                if include_friday:
+                    source = project / "skills" / "fridayoutreach" / "SKILL.md"
+                    source.parent.mkdir(parents=True)
+                    source.write_text("FridayOutreach", encoding="utf-8")
+                with patch.object(setup_script, "PROJECT", project), patch.object(setup_script.Path, "home", return_value=home):
+                    for _ in range(2):
+                        setup_script._install()
+                        expected = setup_script._launcher()
+                        self.assertEqual((home / ".local/bin/lead-collector").read_text(), expected)
+                        friday = home / ".local/bin/fridayoutreach"
+                        self.assertEqual(friday.exists(), include_friday)
+                        if include_friday:
+                            self.assertEqual(friday.read_text(), expected)
+                            self.assertEqual((home / ".codex/skills/fridayoutreach/SKILL.md").read_text(), "FridayOutreach")
+
+    def test_unknown_friday_skill_targets_preserve_all_user_files(self) -> None:
+        for kind in ("file", "symlink", "hardlink"):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                project, home = root / "lead-collector", root / "home"
+                self._runtime(project)
+                self._skill(project)
+                source = project / "skills/fridayoutreach/SKILL.md"
+                source.parent.mkdir(parents=True)
+                source.write_text("FridayOutreach", encoding="utf-8")
+                target = home / ".codex/skills/fridayoutreach/SKILL.md"
+                target.parent.mkdir(parents=True)
+                owned = root / "owned-skill"
+                owned.write_text("user-owned", encoding="utf-8")
+                if kind == "file":
+                    target.write_text("user-owned", encoding="utf-8")
+                elif kind == "symlink":
+                    target.symlink_to(owned)
+                else:
+                    os.link(owned, target)
+                with patch.object(setup_script, "PROJECT", project), patch.object(setup_script.Path, "home", return_value=home):
+                    with self.assertRaises(RuntimeError):
+                        setup_script._install()
+                self.assertEqual(owned.read_text(), "user-owned")
+                self.assertEqual(target.read_text(), "user-owned")
+                self.assertFalse((home / ".local/bin").exists())
+                self.assertFalse((home / ".codex/skills/lead-collector").exists())
+
     def _command(self, command: list[str], cwd: Path, environment: dict[str, str]) -> str:
         result = subprocess.run(command, cwd=cwd, env=environment, text=True, capture_output=True, check=False)
         self.assertEqual(result.returncode, 0, " ".join(command) + "\n" + result.stderr + result.stdout)
