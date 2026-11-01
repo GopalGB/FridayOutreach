@@ -1,8 +1,8 @@
-# FridayOutreach
+# FridayOutreach business lead scraper and email extractor
 
 [![Verify](https://github.com/GopalGB/FridayOutreach/actions/workflows/verify.yml/badge.svg)](https://github.com/GopalGB/FridayOutreach/actions/workflows/verify.yml) [![Release](https://img.shields.io/github/v/release/GopalGB/FridayOutreach?display_name=tag)](https://github.com/GopalGB/FridayOutreach/releases) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-FridayOutreach turns approved public websites into source-linked CSVs for review. Its deterministic local core preserves all observations in a full CSV and writes a strict safe-only CSV when local mailbox checks qualify a contact. It is ready for a trusted function-calling host through its documented local agent runner.
+FridayOutreach is a business lead scraper and email scraper that turns approved public websites into source-linked CSVs for review. Its deterministic local core extracts actual published business contacts, preserves all observations in a full CSV, and writes a strict safe-only CSV when local mailbox checks qualify a contact. It is ready for a trusted function-calling host through its documented local agent runner.
 
 - Collect tables or repeated cards with explicit recipes, then review, edit or exclude records before export.
 - Extract published contacts with their source URLs and observation times.
@@ -54,6 +54,7 @@ Default enrichment checks the local verifier before capture; an explicit opt-out
 ## Documentation and contribution
 
 - [Getting started](docs/GETTING-STARTED.md)  -  preview, collection, review, export, and enrichment.
+- [Business lead scraping and email extraction without AI](docs/LEAD-AND-EMAIL-SCRAPING.md)  -  collect published contacts, verify emails, and export full and safe-contact CSVs.
 - [Architecture](docs/ARCHITECTURE.md)  -  validation and data flow.
 - [Output schema](docs/OUTPUT-SCHEMA.md) and [troubleshooting](docs/TROUBLESHOOTING.md).
 - [Agent usage](docs/AGENT-USAGE.md)  -  trusted local function-host contract.

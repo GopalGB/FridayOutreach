@@ -15,12 +15,13 @@
     "CODE_OF_CONDUCT.md": "cd655044c624caefc4f1ab022fa9f6f10a6ec1056d74114d99f76a77f5d9a765",
     "CONTRIBUTING.md": "ea402886a430c4dd1ff121acf12d540225930760ede834773516de2a5563d02d",
     "LICENSE": "84b8a169d21a755c50151066f78d74864cdf1cb287a5696466c93472247e7bff",
-    "README.md": "9d2c3ab68c55a6dcb8824ec65f63e796b14be339ee461147c558519005b34e2f",
+    "README.md": "cf246e108af11162d1b7f8d4aafa567f15b9c40af8278f26762078bfdad4a109",
     "ROADMAP.md": "a02e6010f0f9248e89a45f555053dda233e369f44d2b6fc4b6a39ea29270b47a",
     "SECURITY.md": "eed4d37684574a7615a171b6e24171ea1fb6c7c6db347d6b7c679485b7d4d675",
     "docs/AGENT-USAGE.md": "4a2d31d681bb838625e28a2dd1f187b622bbb110603366a506b8185c2ff9edad",
     "docs/ARCHITECTURE.md": "5d7bbe5f2394b0d8f1d64539b4f9b0f544d9ffc88805d1929214a95f56c1566e",
     "docs/GETTING-STARTED.md": "43b511f24e3e300bc2398f51fe02172666af58a494bdf5f0bbc7c65380f647a4",
+    "docs/LEAD-AND-EMAIL-SCRAPING.md": "9fcbe2443c89f3cb57d00d6ce424167609100d0bb6f3499cb0535c929bdd67a0",
     "docs/OUTPUT-SCHEMA.md": "0ad69a9ca883f2320e64a897aafd5c8fe9e945fb277431c105c899ac5c5c5451",
     "docs/TROUBLESHOOTING.md": "5c1b7a1a4a6b9e7098344d7b2c39e69dd2d3f6e82dd4da1f61469da6116893e2",
     "docs/VERIFICATION.md": "6e5484bf365d65d152e37613eb411bae27122a582b64aa129ae838b599684af4",
@@ -132,5 +133,5 @@
   "safeContactsFilename": "<output-stem>.safe.csv",
   "safeContactsPredicate": "literal published address + native Reacher safe + mailboxVerified true + syntax/MX/SMTP true + catchAll/disabled/fullInbox false + no error",
   "skill": "skills/fridayoutreach/SKILL.md",
-  "sourceDigest": "c46c9edc05d6fb39ebcbeee28f4712f23329857a6e5268f87e47485b68c0f71e"
+  "sourceDigest": "c34405c410245c335cc302360a85745d0d1d02b56275736df3147d263c7e8c83"
 }
