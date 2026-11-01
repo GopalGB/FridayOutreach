@@ -1,6 +1,6 @@
 # FridayOutreach
 
-[![Verify](https://github.com/GopalGB/FridayOutreach/actions/workflows/verify.yml/badge.svg)](https://github.com/GopalGB/FridayOutreach/actions/workflows/verify.yml) [![Release](https://img.shields.io/github/v/release/GopalGB/FridayOutreach?display_name=tag)](https://github.com/GopalGB/FridayOutreach/releases)
+[![Verify](https://github.com/GopalGB/FridayOutreach/actions/workflows/verify.yml/badge.svg)](https://github.com/GopalGB/FridayOutreach/actions/workflows/verify.yml) [![Release](https://img.shields.io/github/v/release/GopalGB/FridayOutreach?display_name=tag)](https://github.com/GopalGB/FridayOutreach/releases) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 FridayOutreach turns approved public websites into source-linked CSVs for review. Its deterministic local core preserves all observations in a full CSV and writes a strict safe-only CSV when local mailbox checks qualify a contact. It is ready for a trusted function-calling host through its documented local agent runner.
 
@@ -63,4 +63,4 @@ If FridayOutreach is useful, a star helps others discover it.
 
 ## Evidence and license
 
-The verification report records two 368-test native-host passes and two recorded 22-business/48-check replays with four safe results. Those are measured local evidence, not a benchmark; no raw real leads are public. The repository has no root license grant yet; [issue #7](https://github.com/GopalGB/FridayOutreach/issues/7) tracks the maintainer’s license decision.
+The verification report records two 368-test native-host passes and two recorded 22-business/48-check replays with four safe results. Those are measured local evidence, not a benchmark; no raw real leads are public. FridayOutreach is licensed under the [MIT License](LICENSE). Third-party components and their notices remain governed by their respective licenses.

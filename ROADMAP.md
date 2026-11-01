@@ -1,6 +1,6 @@
 # Roadmap
 
-These are open planned contributions, not completed features.
+The contribution backlog is open; completed maintainer decisions are recorded below.
 
 ## Good first issue
 
@@ -16,4 +16,4 @@ These are open planned contributions, not completed features.
 
 ## Maintainer decision
 
-7. [Choose and add a project-wide license](https://github.com/GopalGB/FridayOutreach/issues/7)  -  decide terms before adding a root `LICENSE`; no blanket grant is made here.
+7. [Choose and add a project-wide license](https://github.com/GopalGB/FridayOutreach/issues/7)  -  completed: the project-wide [MIT License](LICENSE) is now included; third-party notices and licenses remain applicable.

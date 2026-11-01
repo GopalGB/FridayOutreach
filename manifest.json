@@ -13,9 +13,10 @@
     ".github/workflows/verify.yml": "4d480a111ba186596b84993ee628a34dd038a2403f6559bdca3f73c40470f8ec",
     ".gitignore": "9251465406dc97d52546eb7c0d542b14cae3efacb5178f4a1ee0d7d4677b6c02",
     "CODE_OF_CONDUCT.md": "cd655044c624caefc4f1ab022fa9f6f10a6ec1056d74114d99f76a77f5d9a765",
-    "CONTRIBUTING.md": "4e14e76f913902c2a11cf615dab812a6cf7d9de718928261ec392da96fc8487b",
-    "README.md": "48ad627abd427e986d882bee8eba26ca55ccca83d0833fb2992f2ca4e6d748f0",
-    "ROADMAP.md": "38e725394ed8cba49ecec98e7e275d9e1c045686ac16c3d7205f92fab38b0d1d",
+    "CONTRIBUTING.md": "ea402886a430c4dd1ff121acf12d540225930760ede834773516de2a5563d02d",
+    "LICENSE": "84b8a169d21a755c50151066f78d74864cdf1cb287a5696466c93472247e7bff",
+    "README.md": "9d2c3ab68c55a6dcb8824ec65f63e796b14be339ee461147c558519005b34e2f",
+    "ROADMAP.md": "a02e6010f0f9248e89a45f555053dda233e369f44d2b6fc4b6a39ea29270b47a",
     "SECURITY.md": "eed4d37684574a7615a171b6e24171ea1fb6c7c6db347d6b7c679485b7d4d675",
     "docs/AGENT-USAGE.md": "4a2d31d681bb838625e28a2dd1f187b622bbb110603366a506b8185c2ff9edad",
     "docs/ARCHITECTURE.md": "5d7bbe5f2394b0d8f1d64539b4f9b0f544d9ffc88805d1929214a95f56c1566e",
@@ -115,6 +116,7 @@
   "jevLive": "UNRUN; ZERO CHARGE",
   "launcher": "fridayoutreach",
   "legacyAliasesPreserved": true,
+  "license": "MIT",
   "lockExport": "Only generation-comment paths made portable; package pins and hashes unchanged",
   "optionalAi": "local ScrapeGraphAI; no automatic service/model setup",
   "optionalNativeVerifier": "Reacher core0.11.11; SMTP-only; binary/toolchain separate; pinned source+build instructions included",
@@ -130,5 +132,5 @@
   "safeContactsFilename": "<output-stem>.safe.csv",
   "safeContactsPredicate": "literal published address + native Reacher safe + mailboxVerified true + syntax/MX/SMTP true + catchAll/disabled/fullInbox false + no error",
   "skill": "skills/fridayoutreach/SKILL.md",
-  "sourceDigest": "d4832269c2a06137d20286687028ca4c233d95737e0f9c31a3ac085e63e520de"
+  "sourceDigest": "c46c9edc05d6fb39ebcbeee28f4712f23329857a6e5268f87e47485b68c0f71e"
 }
