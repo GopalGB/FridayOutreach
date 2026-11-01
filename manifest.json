@@ -14,11 +14,11 @@
     ".gitignore": "9251465406dc97d52546eb7c0d542b14cae3efacb5178f4a1ee0d7d4677b6c02",
     "CODE_OF_CONDUCT.md": "cd655044c624caefc4f1ab022fa9f6f10a6ec1056d74114d99f76a77f5d9a765",
     "CONTRIBUTING.md": "4e14e76f913902c2a11cf615dab812a6cf7d9de718928261ec392da96fc8487b",
-    "README.md": "947386f508d6ec8d1c870890e663125e342f1fdd1a157f592d2e87254743a1d6",
+    "README.md": "48ad627abd427e986d882bee8eba26ca55ccca83d0833fb2992f2ca4e6d748f0",
     "ROADMAP.md": "38e725394ed8cba49ecec98e7e275d9e1c045686ac16c3d7205f92fab38b0d1d",
     "SECURITY.md": "eed4d37684574a7615a171b6e24171ea1fb6c7c6db347d6b7c679485b7d4d675",
     "docs/AGENT-USAGE.md": "4a2d31d681bb838625e28a2dd1f187b622bbb110603366a506b8185c2ff9edad",
-    "docs/ARCHITECTURE.md": "743ec526cc830752bbc62029a59ab85e4250646ee0dffa75e3f059a720548837",
+    "docs/ARCHITECTURE.md": "5d7bbe5f2394b0d8f1d64539b4f9b0f544d9ffc88805d1929214a95f56c1566e",
     "docs/GETTING-STARTED.md": "43b511f24e3e300bc2398f51fe02172666af58a494bdf5f0bbc7c65380f647a4",
     "docs/OUTPUT-SCHEMA.md": "0ad69a9ca883f2320e64a897aafd5c8fe9e945fb277431c105c899ac5c5c5451",
     "docs/TROUBLESHOOTING.md": "5c1b7a1a4a6b9e7098344d7b2c39e69dd2d3f6e82dd4da1f61469da6116893e2",
@@ -130,5 +130,5 @@
   "safeContactsFilename": "<output-stem>.safe.csv",
   "safeContactsPredicate": "literal published address + native Reacher safe + mailboxVerified true + syntax/MX/SMTP true + catchAll/disabled/fullInbox false + no error",
   "skill": "skills/fridayoutreach/SKILL.md",
-  "sourceDigest": "3743821da241715942aad77ebc5cdccc265295b3f7b7a7339c6880abb5a26d80"
+  "sourceDigest": "d4832269c2a06137d20286687028ca4c233d95737e0f9c31a3ac085e63e520de"
 }

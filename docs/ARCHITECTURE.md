@@ -12,7 +12,7 @@ flowchart TD
   E --> G[Safe-only CSV for qualifying contacts]
 ```
 
-The diagram is a flow description. On default enrichment, an unavailable verifier stops before HTTP and before output writing. An explicit opt-out still permits bounded capture but produces unverified full-output contacts and no safe qualifiers. The safe CSV is a strict projection, not a second source of truth.
+On default enrichment, an unavailable verifier stops before HTTP and before output writing. An explicit opt-out still permits bounded capture but produces unverified full-output contacts and no safe qualifiers. The safe CSV is a strict projection, not a second source of truth.
 
 | Component | Responsibility |
 | --- | --- |
@@ -37,4 +37,4 @@ flowchart LR
   E --> F[Maintainer review and CI]
 ```
 
-This flow describes the review sequence, not a rendered-diagram check. Do not hand-edit generated locks or release metadata; a maintainer regenerates the manifest. Planned work is linked in [ROADMAP.md](../ROADMAP.md).
+Do not hand-edit generated locks or release metadata; a maintainer regenerates the manifest. Planned work is linked in [ROADMAP.md](../ROADMAP.md).

@@ -49,7 +49,7 @@ flowchart LR
   D --> F[Safe-only CSV for qualifying contacts]
 ```
 
-The diagram shows order, not a promise of any result: default enrichment checks the local verifier before capture; an explicit opt-out records unverified results and cannot qualify safe contacts. Deterministic extraction uses no AI. ScrapeGraphAI is optional and local; Jev live execution is UNRUN and cost-guarded. Windows is not tested.
+Default enrichment checks the local verifier before capture; an explicit opt-out records unverified results and cannot qualify safe contacts. Deterministic extraction uses no AI. ScrapeGraphAI is optional and local; Jev live execution is UNRUN and cost-guarded. Windows is not tested.
 
 ## Documentation and contribution
 
