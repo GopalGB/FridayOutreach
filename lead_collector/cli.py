@@ -187,7 +187,7 @@ def _add_local_commands(commands: argparse._SubParsersAction[EnvelopeParser]) ->
 
 
 def _parser() -> EnvelopeParser:
-    parser = EnvelopeParser(prog="lead-collector")
+    parser = EnvelopeParser(prog="fridayoutreach")
     parser.add_argument("--state", type=Path, default=DEFAULT_STATE, metavar="PATH", help="managed state leaf or direct path inside ~/.local/share/lead-collector")
     commands = parser.add_subparsers(dest="command", required=True)
     doctor = commands.add_parser("doctor")

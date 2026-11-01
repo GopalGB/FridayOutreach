@@ -214,8 +214,13 @@ class SetupTests(unittest.TestCase):
             environment = {"HOME": str(home), "PATH": os.environ["PATH"], "UV_OFFLINE": "1"}
             setup = [sys.executable, str(release / "scripts" / "setup.py")]
             self._command(setup + ["--core", "--install"], release, environment)
-            friday = home / ".local" / "bin" / "fridayoutreach"
-            self.assertIn('"ok":true', self._command([str(friday), "doctor"], root, environment))
+            for name in ("fridayoutreach", "lead-collector"):
+                launcher = home / ".local" / "bin" / name
+                with self.subTest(alias=name):
+                    help_text = self._command([str(launcher), "--help"], root, environment)
+                    self.assertTrue(help_text.startswith("usage: fridayoutreach "), help_text)
+                    doctor = json.loads(self._command([str(launcher), "doctor"], root, environment))
+                    self.assertTrue(doctor["ok"])
             self._command(setup + ["--install"], release, environment)
             self.assertEqual(
                 (home / ".codex" / "skills" / "fridayoutreach" / "SKILL.md").read_bytes(),
