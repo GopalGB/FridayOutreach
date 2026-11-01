@@ -1,0 +1,1 @@
+{"input_csv":"examples/businesses.csv","output_csv":"examples/businesses.enriched.csv","max_sites":2,"max_pages_per_site":2}

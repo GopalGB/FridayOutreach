@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.venv*/
+.DS_Store
+dist/
+.tools/
+.public-release/
+.planning/
+state/
+*.sqlite3
+*.log
+.env*
+credentials.json
+*.pem
+*.key
+*.csv
+!examples/*.csv

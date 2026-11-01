@@ -1,0 +1,56 @@
+# Verification
+
+Local verification date: 2026-11-01. This report describes measured checks, with optional components distinguished from the portable core.
+
+## Frozen local source
+
+Two consecutive real-host passes completed **348 unittest tests** successfully, Ruff0.15.7 and raw strict MyPy1.9.0 across26production Python files. All production files are counted, including standalone scripts that were not imported. No coverage exclusions were added.
+
+| Production Python measure | Result |
+| --- | ---: |
+| Lines | 87.1563% |
+| Branches | 80.4317% |
+| Functions with an executed body statement | 95.8984% |
+
+| New module | Lines | Branches |
+| --- | ---: | ---: |
+| `lead_collector/batch.py` | 88.7892% | 83.9286% |
+| `lead_collector/batch_safety.py` | 96.9388% | 86.6667% |
+| `scripts/agent_tool.py` | 92.9204% | 83.3333% |
+
+Raw line/branch data is in [coverage.json](coverage.json). Function execution uses at least one non-docstring body statement, not a claim that every path was executed. The full host has the optional local SDK environment and pinned native source; a fresh core checkout deliberately skips tests that need those absent optional artifacts.
+
+## Public payload and dependencies
+
+The explicit public source payload was checked with Gitleaks and Bandit. The release gate requires zero secrets and zero medium/high Python SAST findings. Reviewed low-severity reports concern explicit subprocess boundaries and invariant assertions. The runtime dependency audit queried only public package names and versions:100unique PyPI pins and298Rust crate pins, with zero known OSV advisories at the check time. This is a scoped audit, not a guarantee that no vulnerability exists. Rust received scoped source review, native tests and the Cargo dependency audit; no Rust SAST or Rust coverage percentage is claimed.
+
+The exported lockfiles preserve every dependency pin and hash; only generation-comment paths are made portable. The native runtime, compilers, caches, private task records and real lead dataset are not repository payloads. The release manifest supplies per-file SHA-256 values.
+
+## Actual local Reacher checks
+
+The native Apple Silicon runner links official Reacher core v0.11.11, pinned to commit `2da147a38a11bda1f2e032615ef21c0ed55e9bd1`, with exact Hickory0.26.2 dependencies and source-checked API/macOS resolver compatibility patches. All provider variants use SMTP; Gravatar, HIBP, proxy, browser and account-recovery methods are disabled. Three native configuration/parser tests passed.
+
+A prior real run checked48source-observed addresses:4safe,42risky,2invalid,0unknown. Only the4safe results had mailboxVerified=true. A fresh run of the new `enrich --verify-emails` command fetched one approved public business site, found one literal address and returned safe through the actual local native engine. No email was guessed and no email message body was sent. Raw contact data remains local; aggregate results are reported here.
+
+Native executable SHA-256: `0dbcc0a9b94165e5870989d814d3e5c10cef0f4f1887a06ce9830a3957104a07`.
+
+Reacher outcomes are observations at the check time. Risky/catch-all/unknown results remain unverified; a later mail-server response can differ. Missing local verifier capability is a named failure before work, not simulated success.
+
+## Reproduce core checks
+
+Use Python3.11+ and a user-owned virtual environment:
+
+```sh
+python3 scripts/setup.py --core
+.venv/bin/python -m pip install --index-url https://pypi.org/simple ruff==0.15.7 mypy==1.9.0 bandit==1.9.4
+export PATH="$PWD/.venv/bin:$PATH"
+.venv/bin/python scripts/verify.py
+.venv/bin/mypy --strict --follow-imports=skip scripts/reacher_smtp_runner/patch_reacher_core.py
+.venv/bin/python -m bandit -r lead_collector scripts -ll
+```
+
+The [GitHub workflow](../.github/workflows/verify.yml) runs the portable offline unit/lint/type/SAST checks on a standard public Linux runner. It does not scrape live websites, perform SMTP, call AI, upload artifacts or create caches. Live workflow status is available in [Actions](https://github.com/GopalGB/lead-collector/actions/workflows/verify.yml); this source report does not pre-claim a workflow outcome.
+
+## Optional AI and review
+
+Deterministic collection, enrichment and verification need no AI. ScrapeGraphAI remains an explicit local option with separate SDK/model prerequisites. Jev request/replay contracts are tested; live Jev remains UNRUN under ZERO CHARGE. Claude review was waived by the user and was not run. Local behavior tests, parent review, security checks and artifact verification remain independent gates.

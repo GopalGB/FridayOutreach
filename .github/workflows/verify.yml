@@ -1,0 +1,33 @@
+name: Verify Lead Collector
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-core:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PYTHON_DOTENV_DISABLED: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    steps:
+      - name: Check out public source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Bootstrap core from vendored wheels
+        run: python3 scripts/setup.py --core
+      - name: Prepare local verification tools
+        run: .venv/bin/python -m pip install --no-cache-dir --index-url https://pypi.org/simple ruff==0.15.7 mypy==1.9.0 bandit==1.9.4
+      - name: Run offline tests, lint and strict typing
+        run: |
+          export PATH="$PWD/.venv/bin:$PATH"
+          .venv/bin/python scripts/verify.py
+          .venv/bin/mypy --strict --follow-imports=skip scripts/reacher_smtp_runner/patch_reacher_core.py
+      - name: Check Python source for medium or high findings
+        run: .venv/bin/python -m bandit -r lead_collector scripts -ll
