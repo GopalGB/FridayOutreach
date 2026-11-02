@@ -28,6 +28,8 @@ jobs:
         run: |
           command -v node
           node --version
+      - name: Check offline documentation structure
+        run: .venv/bin/python scripts/check_docs.py
       - name: Run offline tests, lint and strict typing
         run: |
           export PATH="$PWD/.venv/bin:$PATH"
