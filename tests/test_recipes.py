@@ -15,6 +15,7 @@ from lead_collector.store import open_store, save_job
 
 SOURCE = "https://directory.example.test/list"
 OBSERVED = "2026-10-31T00:00:00Z"
+EXAMPLES = Path(__file__).parents[1] / "examples"
 
 
 def observed(raw: str, normalized: str | None = None, source: str = SOURCE) -> ObservedValue:
@@ -29,6 +30,85 @@ def invoke(*arguments: str) -> tuple[int, dict[str, object]]:
 
 
 class RecipeAndExportCommandTests(unittest.TestCase):
+    def test_fictional_card_recipe_previews_exact_mapped_rows_and_evidence(self):
+        html = EXAMPLES / "fictional-directory.html"
+        committed_recipe = EXAMPLES / "fictional-directory.recipe.json"
+        source_url = "https://directory.example.test/fictional"
+        mapping = '{"Name":"company","Website":"website","Address":"address"}'
+        selection = '{"selector":".directory-card","columnSelectors":{"Name":".name","Website":".website","Address":".address","Region":".region"}}'
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            state = root / "jobs.sqlite3"
+            generated_recipe = root / "recipe.json"
+            with patch.object(store, "MANAGED_STATE_ROOT", root):
+                save_exit, saved = invoke(
+                    "--state", str(state), "recipe", "save",
+                    "--html", str(html), "--source-url", source_url,
+                    "--mapping", mapping, "--selection", selection,
+                    "--output", str(generated_recipe),
+                )
+                generated_recipe_text = generated_recipe.read_text(encoding="utf-8")
+                preview_exit, preview = invoke(
+                    "--state", str(state), "recipe", "preview",
+                    "--recipe", str(committed_recipe), "--html", str(html),
+                    "--source-url", source_url,
+                )
+
+        self.assertEqual(save_exit, 0, saved)
+        self.assertEqual(
+            generated_recipe_text,
+            committed_recipe.read_text(encoding="utf-8"),
+        )
+        self.assertEqual(preview_exit, 0, preview)
+        self.assertFalse(state.exists(), "offline preview must not create a collection job")
+
+        rows = preview["data"]["rows"]
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(
+            [
+                {
+                    "company": row["company"]["normalized"],
+                    "website": row["website"]["normalized"],
+                    "websiteRaw": row["website"]["raw"],
+                    "address": row["address"]["normalized"],
+                    "region": row["generic"]["Region"][0]["normalized"],
+                }
+                for row in rows
+            ],
+            [
+                {
+                    "company": "Juniper & Slate",
+                    "website": "https://directory.example.test/juniper-slate",
+                    "websiteRaw": "/juniper-slate",
+                    "address": "12 Example Lane",
+                    "region": "North",
+                },
+                {
+                    "company": "Cedarline Press",
+                    "website": "https://directory.example.test/cedarline-press",
+                    "websiteRaw": "/cedarline-press",
+                    "address": "34 Sample Street",
+                    "region": "Central",
+                },
+                {
+                    "company": "Morrowglass Studio",
+                    "website": "https://directory.example.test/morrowglass-studio",
+                    "websiteRaw": "/morrowglass-studio",
+                    "address": "56 Fiction Road",
+                    "region": "South",
+                },
+            ],
+        )
+        for row in rows:
+            self.assertEqual(row["company"]["sourceUrl"], source_url)
+            self.assertEqual(row["website"]["sourceUrl"], source_url)
+            self.assertEqual(row["address"]["sourceUrl"], source_url)
+            self.assertEqual(row["generic"]["Region"][0]["sourceUrl"], source_url)
+            self.assertEqual(row["company"]["raw"], row["company"]["normalized"])
+            self.assertEqual(row["address"]["raw"], row["address"]["normalized"])
+            self.assertEqual(row["generic"]["Region"][0]["raw"], row["generic"]["Region"][0]["normalized"])
+
     def test_selected_exports_import_losslessly_and_clear_requires_confirmation(self):
         """Exporting excluded/editable branches or importing them with new IDs must fail this local workflow."""
         kept = LeadRow(

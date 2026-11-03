@@ -54,6 +54,25 @@ fridayoutreach export --job JOB_ID --format csv --output businesses.csv --row RO
 
 Copy job and row IDs from the returned JSON, and repeat `--row ROW_ID` for each chosen record. Use a new output filename. For repeated-card layouts, inspect `fridayoutreach recipe --help` and save an explicit recipe rather than assuming a universal layout. Collection captures directory values; the enrichment command below visits the selected business websites.
 
+## Preview a fictional card directory offline
+
+The checked-in [fictional directory](../examples/fictional-directory.html) uses example-domain URLs and contains no real business or contact data. Save its supported recipe with explicit card and column selectors, then preview it from the local HTML file:
+
+```sh
+fridayoutreach recipe save \
+  --html examples/fictional-directory.html \
+  --source-url https://directory.example.test/fictional \
+  --mapping '{"Name":"company","Website":"website","Address":"address"}' \
+  --selection '{"selector":".directory-card","columnSelectors":{"Name":".name","Website":".website","Address":".address","Region":".region"}}' \
+  --output examples/fictional-directory.recipe.json --overwrite
+fridayoutreach recipe preview \
+  --recipe examples/fictional-directory.recipe.json \
+  --html examples/fictional-directory.html \
+  --source-url https://directory.example.test/fictional
+```
+
+The preview prints the three mapped rows and their source evidence without creating a job or contacting the example URLs. If the card layout changes, the saved selection fingerprint makes the preview fail for review instead of silently returning a different set of fields.
+
 For default verified enrichment, first build the optional trusted local runner using the [native runner README](../scripts/reacher_smtp_runner/README.md), then use your own business CSV:
 
 ```sh
